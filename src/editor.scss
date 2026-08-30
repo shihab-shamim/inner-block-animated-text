@@ -19,19 +19,16 @@ $primaryColor: #4527a4;
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	counter-reset: none;
 
 	li {
 		display: flex;
 		align-items: center;
 		gap: 8px;
 		margin: 0;
-		padding: 7px 10px;
-		border-radius: 4px;
-		background: #f0f0f1;
+		padding: 0;
 
 		+ li {
-			margin-top: 6px;
+			margin-top: 8px;
 		}
 	}
 
@@ -44,9 +41,20 @@ $primaryColor: #4527a4;
 		text-transform: uppercase;
 	}
 
-	.ibtaBlockElementTitle {
-		color: #1e1e1e;
-		font-size: 13px;
-		line-height: 1.4;
+	.ibtaBlockElementText {
+		flex-grow: 1;
+		min-width: 0;
+
+		input {
+			background: #f0f0f1;
+			font-size: 13px;
+		}
 	}
+}
+
+.ibtaBlockElementsEmpty {
+	margin: 0;
+	color: #757575;
+	font-size: 12px;
+	font-style: italic;
 }

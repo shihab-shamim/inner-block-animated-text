@@ -4,11 +4,11 @@ import Settings from "./Settings/Settings";
 import { innerBlocksTemplate, allowedInnerBlocks } from "../../utils/options";
 
 const Edit = (props) => {
-  const { attributes, setAttributes } = props;
+  const { attributes, setAttributes, clientId } = props;
 
   return (
     <>
-      <Settings {...{ attributes, setAttributes }} />
+      <Settings {...{ attributes, setAttributes, clientId }} />
 
       <div {...useBlockProps()}>
         <InnerBlocks template={innerBlocksTemplate} allowedBlocks={allowedInnerBlocks} />

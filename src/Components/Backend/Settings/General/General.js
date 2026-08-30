@@ -1,42 +1,48 @@
+import { useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
 
 import { useSelect } from '@wordpress/data';
-import { store as blocksStore } from '@wordpress/blocks';
-import { PanelBody, SelectControl } from '@wordpress/components';
-import { purposeTypeOptions, allowedInnerBlocks } from '../../../../utils/options';
+import { getBlockContent } from '@wordpress/blocks';
+import { store as blockEditorStore } from '@wordpress/block-editor';
+import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
+import { purposeTypeOptions } from '../../../../utils/options';
 import { updateData, getOrdinal } from '../../../../utils/functions';
 
 
-const General = ({ attributes, setAttributes }) => {
+const General = ({ attributes, setAttributes, clientId }) => {
   const { purposeType } = attributes;
 
-  const blockElements = useSelect((select) => {
-    const { getBlockType } = select(blocksStore);
+  const innerHTML = useSelect((select) => {
+    const block = select(blockEditorStore).getBlock(clientId);
 
-    return allowedInnerBlocks.map((name) => ({ name, title: getBlockType(name)?.title || name }));
-  }, []);
+    return block ? block.innerBlocks.map((innerBlock) => getBlockContent(innerBlock)).join('') : '';
+  }, [clientId]);
+
+  const blockElements = useMemo(() => {
+    const doc = new DOMParser().parseFromString(innerHTML, 'text/html');
+
+    return Array.from(doc.body.children).map((el) => el.textContent.trim());
+  }, [innerHTML]);
 
   return (
     <>
-      <PanelBody className='bPlPanelBody' title={__('Purpose', 'inner-block-text-animation')} initialOpen={false}>
-        <SelectControl
-          label={__('Purpose', 'inner-block-text-animation')}
-          labelPosition='left'
-          value={purposeType}
-          options={purposeTypeOptions}
-          onChange={(v) => setAttributes({ purposeType: updateData(purposeType, v) })}
-        />
-      </PanelBody>
+  
 
       <PanelBody className='bPlPanelBody' title={__('Block Elements', 'inner-block-text-animation')} initialOpen={false}>
-        <ol className='ibtaBlockElements'>
-          {
-            blockElements.map(({ name, title }, i) => <li key={name}>
-              <span className='ibtaBlockElementIndex'>{getOrdinal(i + 1)}.</span>
-              <span className='ibtaBlockElementTitle'>{title}</span>
-            </li>)
-          }
-        </ol>
+        {
+          blockElements.length ?
+            <ol className='ibtaBlockElements'>
+              {
+                blockElements.map((text, i) => <li key={i}>
+                  <span className='ibtaBlockElementIndex'>{getOrdinal(i + 1)}.</span>
+
+                  <TextControl className='ibtaBlockElementText' value={text} readOnly onChange={() => { }} __nextHasNoMarginBottom />
+                </li>)
+              }
+            </ol>
+            :
+            <p className='ibtaBlockElementsEmpty'>{__('No elements found inside this block.', 'inner-block-text-animation')}</p>
+        }
       </PanelBody>
     </>
   )
