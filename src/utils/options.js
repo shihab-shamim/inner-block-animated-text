@@ -24,3 +24,11 @@ export const allowedInnerBlocks = [
 	'core/verse',
 	'core/code'
 ];
+
+export const containerDefaults = {
+	background: { type: 'solid', color: '#F1F5F9' },
+	padding: { top: '50px', right: '50px', bottom: '50px', left: '50px' },
+	margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' },
+	radius: { top: '0px', right: '0px', bottom: '0px', left: '0px' },
+	border: {}
+};

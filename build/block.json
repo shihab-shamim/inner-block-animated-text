@@ -25,6 +25,34 @@
         "color": "black",
         "bg": "#B1C5A4"
       }
+    },
+    "container": {
+      "type": "object",
+      "default": {
+        "background": {
+          "type": "solid",
+          "color": "#F1F5F9"
+        },
+        "padding": {
+          "top": "50px",
+          "right": "50px",
+          "bottom": "50px",
+          "left": "50px"
+        },
+        "margin": {
+          "top": "0px",
+          "right": "0px",
+          "bottom": "0px",
+          "left": "0px"
+        },
+        "radius": {
+          "top": "0px",
+          "right": "0px",
+          "bottom": "0px",
+          "left": "0px"
+        },
+        "border": {}
+      }
     }
   },
   "supports": {
@@ -38,6 +66,8 @@
     "attributes": {}
   },
   "editorScript": "file:./index.js",
-  "style": "file:./index.css",
-  "render": "file:./render.php"
+  "editorStyle": "file:./index.css",
+  "style": "file:./view.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js"
 }

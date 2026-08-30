@@ -1,6 +1,7 @@
 import { useBlockProps, InnerBlocks } from "@wordpress/block-editor";
 
 import Settings from "./Settings/Settings";
+import Style from "../Common/Style";
 import { innerBlocksTemplate, allowedInnerBlocks } from "../../utils/options";
 
 const Edit = (props) => {
@@ -11,6 +12,8 @@ const Edit = (props) => {
       <Settings {...{ attributes, setAttributes, clientId }} />
 
       <div {...useBlockProps()}>
+        <Style attributes={attributes} id={`block-${clientId}`} />
+
         <InnerBlocks template={innerBlocksTemplate} allowedBlocks={allowedInnerBlocks} />
       </div>
     </>
