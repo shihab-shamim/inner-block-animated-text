@@ -1,0 +1,43 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ibta/inner-block-text-animation",
+	"version": "1.0.0",
+	"title": "Inner Block Text Animation",
+	"category": "widgets",
+	"description": "Short description of the Inner Block Text Animation",
+	"keywords": [
+		"Inner Block Text Animation"
+	],
+	"textdomain": "inner-block-text-animation",
+	"attributes": {
+		"alignment": {
+			"type": "string",
+			"default": "center"
+		},
+		"purposeType": {
+			"type": "string",
+			"default": "test"
+		},
+		"colors":{
+			"type":"object",
+			"default":{
+				"color": "black",
+				"bg": "#B1C5A4"
+			}
+		}
+	},
+	"supports": {
+		"align": [
+			"wide",
+			"full"
+		],
+		"html": false
+	},
+	"example": {
+		"attributes": {}
+	},
+	"editorScript": "file:./index.js",
+	"style": "file:./index.css",
+	"render": "file:./render.php"
+}

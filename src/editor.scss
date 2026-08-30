@@ -1,0 +1,52 @@
+$primaryColor: #4527a4;
+
+.bBlocksInspectorInfo {
+	padding: 6px;
+
+	a {
+		text-decoration: none;
+		font-weight: 700;
+	}
+}
+
+.wp-block-ibta-inner-block-text-animation{
+	.selectHelp{
+		color: #616063;
+	}
+}
+
+.ibtaBlockElements {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	counter-reset: none;
+
+	li {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0;
+		padding: 7px 10px;
+		border-radius: 4px;
+		background: #f0f0f1;
+
+		+ li {
+			margin-top: 6px;
+		}
+	}
+
+	.ibtaBlockElementIndex {
+		flex-shrink: 0;
+		min-width: 26px;
+		color: $primaryColor;
+		font-size: 11px;
+		font-weight: 700;
+		text-transform: uppercase;
+	}
+
+	.ibtaBlockElementTitle {
+		color: #1e1e1e;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+}
