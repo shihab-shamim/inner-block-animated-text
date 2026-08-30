@@ -1,0 +1,581 @@
+// Per-element animation output.
+// Every rule reads its value from an inline custom property with a fallback, so one
+// element can never inherit or overwrite another element's settings (Section 16).
+
+// name -> keyframes. Generated below so a new animation is one map entry, not three rules.
+$animations: (
+	// Entrance
+	'fade-in': ibtaFadeIn,
+	'slide-up': ibtaSlideUp,
+	'slide-down': ibtaSlideDown,
+	'slide-left': ibtaSlideLeft,
+	'slide-right': ibtaSlideRight,
+	'zoom-in': ibtaZoomIn,
+	'zoom-out': ibtaZoomOut,
+	'flip-x': ibtaFlipX,
+	'flip-y': ibtaFlipY,
+	'rotate-in': ibtaRotateIn,
+	'blur-in': ibtaBlurIn,
+	'mask-reveal': ibtaMaskReveal,
+	'drop-in': ibtaDropIn,
+	'elastic-in': ibtaElasticIn,
+	'bounce-in': ibtaBounceIn,
+	'swing-in': ibtaSwingIn,
+	// Typing (split parts animate; the text itself is driven by the engine)
+	'character-reveal': ibtaPartReveal,
+	'word-reveal': ibtaPartReveal,
+	'line-reveal': ibtaPartReveal,
+	// Loop
+	'wave': ibtaWave,
+	'bounce': ibtaBounce,
+	'float': ibtaFloat,
+	'pulse': ibtaPulse,
+	'shake': ibtaShake,
+	'glitch': ibtaGlitch,
+	'neon-flicker': ibtaNeonFlicker,
+	'jello': ibtaJello,
+	'heartbeat': ibtaHeartbeat,
+	'swing': ibtaSwing,
+	'wobble': ibtaWobble,
+	'tada': ibtaTada,
+	'rubber-band': ibtaRubberBand,
+	// Creative
+	'split': ibtaSplit,
+	'text-scatter': ibtaScatter,
+	'text-assemble': ibtaAssemble,
+	'text-shatter': ibtaShatter,
+	'perspective': ibtaPerspective,
+	'3d-rotate': ibtaRotate3d,
+	// Style
+	'gradient-move': ibtaGradientMove,
+	'shine': ibtaShine,
+	'color-shift': ibtaColorShift,
+	'highlight': ibtaHighlight,
+	'underline-draw': ibtaUnderlineDraw,
+	'stroke-draw': ibtaStrokeDraw,
+	'text-shadow': ibtaTextShadow,
+	'glow': ibtaGlow,
+	'rainbow': ibtaRainbow,
+	'shimmer': ibtaShimmer
+);
+
+.ibta-anim {
+	animation-duration: var(--ibta-duration, 1s);
+	animation-delay: var(--ibta-delay, 0s);
+	animation-timing-function: var(--ibta-easing, ease);
+	animation-iteration-count: var(--ibta-iteration, 1);
+	animation-fill-mode: both;
+}
+
+// Split output from the engine: the parent stops animating and each part animates
+// on its own staggered delay.
+.ibta-part {
+	display: inline-block;
+	white-space: pre-wrap;
+	animation-duration: var(--ibta-duration, 1s);
+	animation-timing-function: var(--ibta-easing, ease);
+	animation-iteration-count: var(--ibta-iteration, 1);
+	animation-fill-mode: both;
+	animation-delay: calc(var(--ibta-delay, 0s) + var(--ibta-index, 0) * var(--ibta-stagger, 0.05s));
+}
+
+@each $name, $keyframes in $animations {
+	.ibta-anim--#{$name} {
+		animation-name: $keyframes;
+	}
+
+	.ibta-anim--#{$name}.ibta-is-split {
+		animation-name: none;
+
+		.ibta-part {
+			animation-name: $keyframes;
+		}
+	}
+}
+
+// ---------- Entrance ----------
+
+@keyframes ibtaFadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes ibtaSlideUp {
+	from { opacity: 0; transform: translateY(var(--ibta-distance, 40px)); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ibtaSlideDown {
+	from { opacity: 0; transform: translateY(calc(var(--ibta-distance, 40px) * -1)); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ibtaSlideLeft {
+	from { opacity: 0; transform: translateX(var(--ibta-distance, 40px)); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes ibtaSlideRight {
+	from { opacity: 0; transform: translateX(calc(var(--ibta-distance, 40px) * -1)); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+// scale is the extreme; dividing keeps it positive for every value in the 0.1-3 range
+@keyframes ibtaZoomIn {
+	from { opacity: 0; transform: scale(calc(1 / var(--ibta-scale, 1.2))); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ibtaZoomOut {
+	from { opacity: 0; transform: scale(var(--ibta-scale, 1.2)); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ibtaFlipX {
+	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateX(90deg); }
+	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateX(0); }
+}
+
+@keyframes ibtaFlipY {
+	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateY(90deg); }
+	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateY(0); }
+}
+
+.ibta-anim--flip-x,
+.ibta-anim--flip-y { backface-visibility: hidden; }
+
+@keyframes ibtaRotateIn {
+	from { opacity: 0; transform: rotate(var(--ibta-angle, 20deg)); }
+	to { opacity: 1; transform: rotate(0); }
+}
+
+@keyframes ibtaBlurIn {
+	from { opacity: 0; filter: blur(var(--ibta-blur, 10px)); }
+	to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes ibtaMaskReveal {
+	from { clip-path: inset(0 100% 0 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ibtaMaskRevealRight {
+	from { clip-path: inset(0 0 0 100%); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ibtaMaskRevealUp {
+	from { clip-path: inset(100% 0 0 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ibtaMaskRevealDown {
+	from { clip-path: inset(0 0 100% 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+.ibta-anim--mask-reveal {
+	display: inline-block;
+
+	&.ibta-dir--right { animation-name: ibtaMaskRevealRight; }
+	&.ibta-dir--up { animation-name: ibtaMaskRevealUp; }
+	&.ibta-dir--down { animation-name: ibtaMaskRevealDown; }
+}
+
+@keyframes ibtaDropIn {
+	from { opacity: 0; transform: translateY(calc(var(--ibta-distance, 40px) * -1)) scale(1.1); }
+	60% { opacity: 1; transform: translateY(0) scale(1); }
+	80% { transform: translateY(calc(var(--ibta-distance, 40px) * 0.1)); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ibtaElasticIn {
+	from { opacity: 0; transform: translateY(var(--ibta-distance, 40px)); }
+	60% { opacity: 1; transform: translateY(calc(var(--ibta-distance, 40px) * -0.25)); }
+	80% { transform: translateY(calc(var(--ibta-distance, 40px) * 0.12)); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ibtaBounceIn {
+	from { opacity: 0; transform: translateY(var(--ibta-distance, 40px)) scale(0.9); }
+	50% { opacity: 1; transform: translateY(calc(var(--ibta-distance, 40px) * -0.3)) scale(1.03); }
+	75% { transform: translateY(calc(var(--ibta-distance, 40px) * 0.15)); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+// these two omit the easing field: their timing function is baked in (Section 7.3)
+.ibta-anim--elastic-in,
+.ibta-anim--elastic-in.ibta-is-split .ibta-part { animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+.ibta-anim--bounce-in,
+.ibta-anim--bounce-in.ibta-is-split .ibta-part { animation-timing-function: cubic-bezier(0.22, 1.2, 0.36, 1); }
+
+@keyframes ibtaSwingIn {
+	from { opacity: 0; transform: rotate(var(--ibta-angle, 20deg)); }
+	60% { opacity: 1; transform: rotate(calc(var(--ibta-angle, 20deg) * -0.3)); }
+	80% { transform: rotate(calc(var(--ibta-angle, 20deg) * 0.15)); }
+	to { opacity: 1; transform: rotate(0); }
+}
+
+.ibta-anim--swing-in { transform-origin: top center; }
+
+// ---------- Typing ----------
+
+@keyframes ibtaPartReveal {
+	from { opacity: 0; transform: translateY(0.4em); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ibtaCaretBlink {
+	0%, 49% { opacity: 1; }
+	50%, 100% { opacity: 0; }
+}
+
+.ibta-has-cursor::after {
+	content: var(--ibta-cursor-char, '|');
+	animation: ibtaCaretBlink 1s step-end infinite;
+	margin-left: 0.05em;
+}
+
+.ibta-anim--terminal::before {
+	content: var(--ibta-prompt-char, '$');
+	margin-right: 0.5em;
+	opacity: 0.7;
+}
+
+// the engine rewrites the text of these, so no CSS animation-name is assigned
+.ibta-anim--typewriter,
+.ibta-anim--rotating-words,
+.ibta-anim--scramble,
+.ibta-anim--counter,
+.ibta-anim--terminal,
+.ibta-anim--text-decode,
+.ibta-anim--morph {
+	animation-name: none;
+}
+
+.ibta-anim--text-decode .ibta-part { animation-name: ibtaFadeIn; }
+
+// ---------- Loop ----------
+
+@keyframes ibtaMarquee {
+	from { transform: translateX(0); }
+	to { transform: translateX(calc(-50% - var(--ibta-gap, 40px) / 2)); }
+}
+
+.ibta-anim--marquee {
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	animation-name: none;
+
+	.ibta-marquee-track {
+		display: inline-flex;
+		gap: var(--ibta-gap, 40px);
+		will-change: transform;
+		animation-name: ibtaMarquee;
+		animation-duration: var(--ibta-duration, 10s);
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+
+	&.ibta-dir--right .ibta-marquee-track { animation-direction: reverse; }
+}
+
+@keyframes ibtaWave {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(calc(var(--ibta-amplitude, 10px) * -1)); }
+}
+
+@keyframes ibtaBounce {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(calc(var(--ibta-amplitude, 10px) * -1)); }
+}
+
+@keyframes ibtaFloat {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(calc(var(--ibta-amplitude, 10px) * -1)); }
+}
+
+.ibta-anim--float { animation-timing-function: ease-in-out; }
+
+@keyframes ibtaPulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(var(--ibta-scale, 1.2)); }
+}
+
+@keyframes ibtaShake {
+	0%, 100% { transform: translateX(0); }
+	20%, 60% { transform: translateX(calc(var(--ibta-amplitude, 10px) * -1)); }
+	40%, 80% { transform: translateX(var(--ibta-amplitude, 10px)); }
+}
+
+@keyframes ibtaGlitch {
+	0%, 100% {
+		transform: translate(0);
+		text-shadow: none;
+	}
+	20% {
+		transform: translateX(calc(var(--ibta-intensity, 50) * -0.04px));
+		text-shadow: calc(var(--ibta-intensity, 50) * 0.04px) 0 var(--ibta-color, #146EF5), calc(var(--ibta-intensity, 50) * -0.04px) 0 var(--ibta-color-alt, #ff0040);
+	}
+	40% {
+		transform: translateX(calc(var(--ibta-intensity, 50) * 0.04px));
+		text-shadow: calc(var(--ibta-intensity, 50) * -0.04px) 0 var(--ibta-color, #146EF5), calc(var(--ibta-intensity, 50) * 0.04px) 0 var(--ibta-color-alt, #ff0040);
+	}
+	60% {
+		transform: translateY(calc(var(--ibta-intensity, 50) * 0.02px));
+		text-shadow: 0 calc(var(--ibta-intensity, 50) * 0.03px) var(--ibta-color-alt, #ff0040);
+	}
+	80% {
+		transform: translate(0);
+		text-shadow: calc(var(--ibta-intensity, 50) * 0.02px) 0 var(--ibta-color, #146EF5);
+	}
+}
+
+// intensity is unitless so it can be multiplied by a px unit here
+@keyframes ibtaNeonFlicker {
+	0%, 100% { opacity: 1; text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.2px) var(--ibta-color, #146EF5); }
+	42% { opacity: 1; }
+	43% { opacity: 0.4; text-shadow: none; }
+	45% { opacity: 1; }
+	62% { opacity: 0.6; text-shadow: none; }
+	64% { opacity: 1; }
+}
+
+@keyframes ibtaJello {
+	0%, 100% { transform: skewX(0) skewY(0); }
+	30% { transform: skewX(-12deg) skewY(-6deg); }
+	60% { transform: skewX(6deg) skewY(3deg); }
+}
+
+@keyframes ibtaHeartbeat {
+	0%, 100% { transform: scale(1); }
+	25% { transform: scale(var(--ibta-scale, 1.2)); }
+	40% { transform: scale(1); }
+	60% { transform: scale(var(--ibta-scale, 1.2)); }
+}
+
+@keyframes ibtaSwing {
+	0%, 100% { transform: rotate(0); }
+	25% { transform: rotate(var(--ibta-angle, 20deg)); }
+	75% { transform: rotate(calc(var(--ibta-angle, 20deg) * -1)); }
+}
+
+.ibta-anim--swing { transform-origin: top center; }
+
+@keyframes ibtaWobble {
+	0%, 100% { transform: translateX(0) rotate(0); }
+	25% { transform: translateX(calc(var(--ibta-amplitude, 10px) * -1)) rotate(-4deg); }
+	75% { transform: translateX(var(--ibta-amplitude, 10px)) rotate(4deg); }
+}
+
+@keyframes ibtaTada {
+	0%, 100% { transform: scale(1) rotate(0); }
+	20% { transform: scale(0.92) rotate(-3deg); }
+	40%, 60%, 80% { transform: scale(1.1) rotate(3deg); }
+	50%, 70% { transform: scale(1.1) rotate(-3deg); }
+}
+
+@keyframes ibtaRubberBand {
+	0%, 100% { transform: scale(1, 1); }
+	30% { transform: scale(1.25, 0.75); }
+	40% { transform: scale(0.75, 1.25); }
+	60% { transform: scale(1.15, 0.85); }
+}
+
+.ibta-anim--bounce,
+.ibta-anim--float,
+.ibta-anim--pulse,
+.ibta-anim--shake,
+.ibta-anim--jello,
+.ibta-anim--heartbeat,
+.ibta-anim--swing,
+.ibta-anim--wobble,
+.ibta-anim--tada,
+.ibta-anim--rubber-band,
+.ibta-anim--perspective,
+.ibta-anim--3d-rotate { display: inline-block; }
+
+// ---------- Creative ----------
+
+@keyframes ibtaSplit {
+	from { clip-path: inset(0 50% 0 50%); letter-spacing: calc(var(--ibta-distance, 40px) * 0.1); opacity: 0; }
+	to { clip-path: inset(0 0 0 0); letter-spacing: normal; opacity: 1; }
+}
+
+@keyframes ibtaSplitVertical {
+	from { clip-path: inset(50% 0 50% 0); opacity: 0; }
+	to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+.ibta-anim--split {
+	display: inline-block;
+
+	// direction chooses which axis the text opens along
+	&.ibta-dir--up,
+	&.ibta-dir--down { animation-name: ibtaSplitVertical; }
+}
+
+// the engine assigns a random --ibta-rx / --ibta-ry / --ibta-rr per part
+@keyframes ibtaScatter {
+	from { opacity: 1; transform: translate(0, 0) rotate(0); }
+	to {
+		opacity: 0;
+		transform: translate(calc(var(--ibta-rx, 0) * var(--ibta-distance, 40px)), calc(var(--ibta-ry, 0) * var(--ibta-distance, 40px))) rotate(calc(var(--ibta-rr, 0) * 90deg));
+	}
+}
+
+@keyframes ibtaAssemble {
+	from {
+		opacity: 0;
+		transform: translate(calc(var(--ibta-rx, 0) * var(--ibta-distance, 40px)), calc(var(--ibta-ry, 0) * var(--ibta-distance, 40px))) rotate(calc(var(--ibta-rr, 0) * 90deg));
+	}
+	to { opacity: 1; transform: translate(0, 0) rotate(0); }
+}
+
+@keyframes ibtaShatter {
+	0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+	30% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1.05); }
+	100% {
+		opacity: 0;
+		transform: translate(calc(var(--ibta-rx, 0) * var(--ibta-distance, 40px)), calc(var(--ibta-distance, 40px) * 1.5)) rotate(calc(var(--ibta-rr, 0) * 120deg)) scale(0.6);
+	}
+}
+
+@keyframes ibtaPerspective {
+	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateX(var(--ibta-angle, 20deg)) translateZ(-100px); }
+	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateX(0) translateZ(0); }
+}
+
+@keyframes ibtaRotate3d {
+	// angle tilts the axis the spin happens around
+	from { transform: perspective(var(--ibta-perspective, 800px)) rotateX(var(--ibta-angle, 20deg)) rotateY(0); }
+	to { transform: perspective(var(--ibta-perspective, 800px)) rotateX(var(--ibta-angle, 20deg)) rotateY(360deg); }
+}
+
+.ibta-anim--3d-rotate { animation-timing-function: linear; }
+
+// ---------- Style ----------
+
+// text-clipped gradients need a painted background and transparent glyphs
+.ibta-anim--gradient-move,
+.ibta-anim--color-shift,
+.ibta-anim--shine,
+.ibta-anim--shimmer {
+	display: inline-block;
+	background-image: var(--ibta-gradient, linear-gradient(90deg, #146EF5, #18D4FD));
+	background-size: 200% 100%;
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
+}
+
+@keyframes ibtaGradientMove {
+	from { background-position: 0% 50%; }
+	to { background-position: 200% 50%; }
+}
+
+.ibta-anim--gradient-move {
+	animation-timing-function: linear;
+
+	&.ibta-dir--right { animation-direction: reverse; }
+}
+
+@keyframes ibtaColorShift {
+	0%, 100% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+}
+
+@keyframes ibtaShine {
+	from { background-position: -150% 50%; }
+	to { background-position: 250% 50%; }
+}
+
+.ibta-anim--shine,
+.ibta-anim--shimmer {
+	background-image: linear-gradient(
+		100deg,
+		currentColor calc(50% - var(--ibta-shine-width, 20%)),
+		var(--ibta-shine-color, #ffffff) 50%,
+		currentColor calc(50% + var(--ibta-shine-width, 20%))
+	);
+	background-size: 250% 100%;
+}
+
+@keyframes ibtaShimmer {
+	from { background-position: 150% 50%; }
+	to { background-position: -50% 50%; }
+}
+
+@keyframes ibtaHighlight {
+	from { background-size: 0% 100%; }
+	to { background-size: 100% 100%; }
+}
+
+.ibta-anim--highlight {
+	display: inline;
+	background-image: linear-gradient(var(--ibta-highlight-color, #ffe066), var(--ibta-highlight-color, #ffe066));
+	background-repeat: no-repeat;
+	background-position: left center;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+
+	&.ibta-dir--right { background-position: right center; }
+	&.ibta-dir--up,
+	&.ibta-dir--down { background-position: center; }
+}
+
+@keyframes ibtaUnderlineDraw {
+	from { background-size: 0% var(--ibta-stroke-width, 2px); }
+	to { background-size: 100% var(--ibta-stroke-width, 2px); }
+}
+
+.ibta-anim--underline-draw {
+	display: inline;
+	background-image: linear-gradient(var(--ibta-color, #146EF5), var(--ibta-color, #146EF5));
+	background-repeat: no-repeat;
+	background-position: left bottom;
+	padding-bottom: 0.08em;
+}
+
+@keyframes ibtaStrokeDraw {
+	from { -webkit-text-stroke-width: 0; opacity: 0.3; }
+	to { -webkit-text-stroke-width: var(--ibta-stroke-width, 2px); opacity: 1; }
+}
+
+.ibta-anim--stroke-draw {
+	display: inline-block;
+	-webkit-text-stroke-color: var(--ibta-stroke-color, currentColor);
+}
+
+@keyframes ibtaTextShadow {
+	from { text-shadow: 0 0 0 var(--ibta-shadow-color, rgba(0, 0, 0, .4)); }
+	to {
+		text-shadow: var(--ibta-shadow-x, 2px) var(--ibta-shadow-y, 2px) var(--ibta-shadow-blur, 4px) var(--ibta-shadow-color, rgba(0, 0, 0, .4));
+	}
+}
+
+@keyframes ibtaGlow {
+	0%, 100% { text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.1px) var(--ibta-color, #146EF5); }
+	50% { text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.4px) var(--ibta-color, #146EF5); }
+}
+
+@keyframes ibtaRainbow {
+	from { filter: hue-rotate(0deg); }
+	to { filter: hue-rotate(360deg); }
+}
+
+.ibta-anim--rainbow { animation-timing-function: linear; }
+
+.ibta-pause-hover:hover,
+.ibta-pause-hover:hover .ibta-marquee-track { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+	.ibta-anim,
+	.ibta-part,
+	.ibta-marquee-track {
+		animation: none !important;
+	}
+}

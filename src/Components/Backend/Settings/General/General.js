@@ -1,46 +1,67 @@
-import { useMemo } from 'react';
+import { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 
 import { useSelect } from '@wordpress/data';
 import { getBlockContent } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { PanelBody, TextControl } from '@wordpress/components';
+import { PanelBody } from '@wordpress/components';
 import { getOrdinal } from '../../../../utils/functions';
+import AnimationControls from './AnimationControls';
 
 
-const General = ({ clientId }) => {
-  const innerHTML = useSelect((select) => {
+const General = ({ attributes, clientId }) => {
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const blockElements = useSelect((select) => {
     const block = select(blockEditorStore).getBlock(clientId);
 
-    return block ? block.innerBlocks.map((innerBlock) => getBlockContent(innerBlock)).join('') : '';
+    if (!block) {
+      return [];
+    }
+
+    return block.innerBlocks.map((innerBlock) => {
+      const doc = new DOMParser().parseFromString(getBlockContent(innerBlock), 'text/html');
+
+      return {
+        clientId: innerBlock.clientId,
+        attributes: innerBlock.attributes,
+        text: (doc.body.textContent || '').trim()
+      };
+    });
   }, [clientId]);
-
-  const blockElements = useMemo(() => {
-    const doc = new DOMParser().parseFromString(innerHTML, 'text/html');
-
-    return Array.from(doc.body.children).map((el) => el.textContent.trim());
-  }, [innerHTML]);
 
   return (
     <>
-  
 
-      <PanelBody className='bPlPanelBody' title={__('Block Elements', 'inner-block-text-animation')} initialOpen={false}>
+
+      {/* <PanelBody className='bPlPanelBody' title={__('Block Elements', 'inner-block-text-animation')} initialOpen={false}>
         {
           blockElements.length ?
             <ol className='ibtaBlockElements'>
               {
-                blockElements.map((text, i) => <li key={i}>
+                blockElements.map((element, i) => <li key={element.clientId} onClick={() => setActiveIndex(i)}>
                   <span className='ibtaBlockElementIndex'>{getOrdinal(i + 1)}.</span>
 
-                  <TextControl className='ibtaBlockElementText' value={text} readOnly onChange={() => { }} __nextHasNoMarginBottom />
+                  <TextControl className='ibtaBlockElementText' value={element.text} readOnly onChange={() => { }} __nextHasNoMarginBottom />
                 </li>)
               }
             </ol>
             :
             <p className='ibtaBlockElementsEmpty'>{__('No elements found inside this block.', 'inner-block-text-animation')}</p>
         }
-      </PanelBody>
+      </PanelBody> */}
+
+      {
+        blockElements.map((element, i) => <PanelBody
+          key={element.clientId}
+          className='bPlPanelBody itemPanelBody'
+          title={`${getOrdinal(i + 1)} ${__('Element', 'inner-block-text-animation')}`}
+          opened={activeIndex === i}
+          onToggle={(next) => setActiveIndex(next ? i : null)}
+        >
+          <AnimationControls element={element} blockAttributes={attributes} />
+        </PanelBody>)
+      }
     </>
   )
 }

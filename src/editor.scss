@@ -20,6 +20,7 @@ $primaryColor: #4527a4;
 		gap: 8px;
 		margin: 0;
 		padding: 0;
+		cursor: pointer;
 
 		+ li {
 			margin-top: 8px;
@@ -42,6 +43,7 @@ $primaryColor: #4527a4;
 		input {
 			background: #f0f0f1;
 			font-size: 13px;
+			cursor: pointer;
 		}
 	}
 }
@@ -51,4 +53,21 @@ $primaryColor: #4527a4;
 	color: #757575;
 	font-size: 12px;
 	font-style: italic;
+}
+
+.ibtaAnimationLabel {
+	margin: 0 0 4px;
+	font-size: 11px;
+	font-weight: 500;
+	text-transform: uppercase;
+}
+
+.ibtaAnimationWord {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+
+	.components-base-control {
+		flex-grow: 1;
+	}
 }
