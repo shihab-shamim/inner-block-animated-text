@@ -1,23 +1,15 @@
-import { useState } from "react";
 import { __ } from "@wordpress/i18n";
 import {
   PanelBody,
   __experimentalBorderBoxControl as BorderBoxControl,
 } from "@wordpress/components";
-import { Background, BoxControl as BplBoxControl, ColorsControl } from "../../../../../../bpl-tools/Components";
-import CustomPopover from "../../../../../../bpl-tools/Components/CustomPopover/CustomPopover";
+import { Background, BoxControl as BplBoxControl } from "../../../../../../bpl-tools/Components";
 import { updateData } from "../../../../../../bpl-tools/utils/functions";
 import { containerDefaults } from "../../../../utils/options";
 
 const Style = ({ attributes, setAttributes }) => {
-  const { colors, container } = attributes;
+  const { container } = attributes;
   const { background, padding, margin, radius, border } = container || {};
-  const [values, setValues] = useState({
-    top: "50px",
-    left: "10px",
-    right: "10px",
-    bottom: "50px",
-  });
 
   const setContainer = (val, ...props) => setAttributes({ container: updateData(container, val, ...props) });
 

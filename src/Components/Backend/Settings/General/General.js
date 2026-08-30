@@ -4,14 +4,11 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { getBlockContent } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
-import { purposeTypeOptions } from '../../../../utils/options';
-import { updateData, getOrdinal } from '../../../../utils/functions';
+import { PanelBody, TextControl } from '@wordpress/components';
+import { getOrdinal } from '../../../../utils/functions';
 
 
-const General = ({ attributes, setAttributes, clientId }) => {
-  const { purposeType } = attributes;
-
+const General = ({ clientId }) => {
   const innerHTML = useSelect((select) => {
     const block = select(blockEditorStore).getBlock(clientId);
 

@@ -5,11 +5,6 @@ export const generalStyleTabs = [
 	{ name: 'style', title: __('Style', 'inner-block-text-animation') }
 ];
 
-export const purposeTypeOptions = [
-	{ label: 'Test', value: 'test' },
-	{ label: 'Final', value: 'final' }
-]
-
 export const innerBlocksTemplate = [
 	['core/heading', { level: 4, content: __('This Is Animated Text', 'inner-block-text-animation') }]
 ];

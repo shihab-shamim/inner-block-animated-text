@@ -1,1 +1,0 @@
-{"version":3,"file":"view.css","mappings":";;;AAAA;EACI;AACJ,C","sources":["webpack://inner-block-text-animation/./src/style.scss"],"sourcesContent":[".wp-block-ibta-inner-block-text-animation{\r\n    overflow: hidden;\r\n}"],"names":[],"sourceRoot":""}

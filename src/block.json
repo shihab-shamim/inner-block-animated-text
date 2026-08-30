@@ -15,17 +15,6 @@
 			"type": "string",
 			"default": "center"
 		},
-		"purposeType": {
-			"type": "string",
-			"default": "test"
-		},
-		"colors":{
-			"type":"object",
-			"default":{
-				"color": "black",
-				"bg": "#B1C5A4"
-			}
-		},
 		"container": {
 			"type": "object",
 			"default": {
