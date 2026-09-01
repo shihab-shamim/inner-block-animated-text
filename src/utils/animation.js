@@ -85,7 +85,7 @@ export const ANIMATION_SETTINGS = {
 	'flip-y': ['duration', 'delay', 'easing', 'perspective', 'splitBy', 'stagger', 'iteration'],
 	'rotate-in': ['duration', 'delay', 'easing', 'angle', 'splitBy', 'stagger', 'iteration'],
 	'blur-in': ['duration', 'delay', 'easing', 'blurAmount', 'splitBy', 'stagger', 'iteration'],
-	'mask-reveal': ['duration', 'delay', 'easing', 'direction', 'iteration'],
+	'mask-reveal': ['duration', 'delay', 'easing', 'direction', 'splitBy', 'stagger', 'iteration'],
 	'drop-in': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
 	'elastic-in': ['duration', 'delay', 'distance', 'splitBy', 'stagger', 'iteration'],
 	'bounce-in': ['duration', 'delay', 'distance', 'splitBy', 'stagger', 'iteration'],
@@ -104,38 +104,38 @@ export const ANIMATION_SETTINGS = {
 
 	// Loop
 	'marquee': ['direction', 'speed', 'pauseOnHover', 'gap', 'iteration'],
-	'wave': ['duration', 'delay', 'amplitude', 'stagger', 'iteration'],
-	'bounce': ['duration', 'delay', 'amplitude', 'iteration'],
-	'float': ['duration', 'delay', 'amplitude', 'iteration'],
-	'pulse': ['duration', 'delay', 'scale', 'iteration'],
-	'shake': ['duration', 'delay', 'amplitude', 'iteration'],
-	'glitch': ['duration', 'delay', 'intensity', 'color', 'colorAlt', 'iteration'],
-	'neon-flicker': ['duration', 'delay', 'color', 'intensity', 'iteration'],
-	'jello': ['duration', 'delay', 'iteration'],
-	'heartbeat': ['duration', 'delay', 'scale', 'iteration'],
-	'swing': ['duration', 'delay', 'angle', 'iteration'],
-	'wobble': ['duration', 'delay', 'amplitude', 'iteration'],
-	'tada': ['duration', 'delay', 'iteration'],
-	'rubber-band': ['duration', 'delay', 'iteration'],
+	'wave': ['duration', 'delay', 'amplitude', 'splitBy', 'stagger', 'iteration'],
+	'bounce': ['duration', 'delay', 'amplitude', 'splitBy', 'stagger', 'iteration'],
+	'float': ['duration', 'delay', 'amplitude', 'splitBy', 'stagger', 'iteration'],
+	'pulse': ['duration', 'delay', 'scale', 'splitBy', 'stagger', 'iteration'],
+	'shake': ['duration', 'delay', 'amplitude', 'splitBy', 'stagger', 'iteration'],
+	'glitch': ['duration', 'delay', 'intensity', 'color', 'colorAlt', 'splitBy', 'stagger', 'iteration'],
+	'neon-flicker': ['duration', 'delay', 'color', 'intensity', 'splitBy', 'stagger', 'iteration'],
+	'jello': ['duration', 'delay', 'splitBy', 'stagger', 'iteration'],
+	'heartbeat': ['duration', 'delay', 'scale', 'splitBy', 'stagger', 'iteration'],
+	'swing': ['duration', 'delay', 'angle', 'splitBy', 'stagger', 'iteration'],
+	'wobble': ['duration', 'delay', 'amplitude', 'splitBy', 'stagger', 'iteration'],
+	'tada': ['duration', 'delay', 'splitBy', 'stagger', 'iteration'],
+	'rubber-band': ['duration', 'delay', 'splitBy', 'stagger', 'iteration'],
 
 	// Creative
 	'morph': ['words', 'duration', 'delay', 'easing', 'loopDelay', 'iteration'],
-	'split': ['duration', 'delay', 'easing', 'distance', 'direction', 'iteration'],
-	'text-scatter': ['duration', 'delay', 'easing', 'distance', 'stagger', 'iteration'],
-	'text-assemble': ['duration', 'delay', 'easing', 'distance', 'stagger', 'iteration'],
-	'text-shatter': ['duration', 'delay', 'easing', 'distance', 'stagger', 'iteration'],
-	'perspective': ['duration', 'delay', 'easing', 'perspective', 'angle', 'iteration'],
-	'3d-rotate': ['duration', 'delay', 'easing', 'perspective', 'angle', 'iteration'],
+	'split': ['duration', 'delay', 'easing', 'distance', 'direction', 'splitBy', 'stagger', 'iteration'],
+	'text-scatter': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'text-assemble': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'text-shatter': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'perspective': ['duration', 'delay', 'easing', 'perspective', 'angle', 'splitBy', 'stagger', 'iteration'],
+	'3d-rotate': ['duration', 'delay', 'easing', 'perspective', 'angle', 'splitBy', 'stagger', 'iteration'],
 
 	// Style
 	'gradient-move': ['colors', 'duration', 'delay', 'direction', 'iteration'],
 	'shine': ['shineColor', 'shineWidth', 'duration', 'delay', 'iteration'],
 	'color-shift': ['colors', 'duration', 'delay', 'iteration'],
-	'highlight': ['highlightColor', 'duration', 'delay', 'easing', 'direction', 'iteration'],
-	'underline-draw': ['color', 'strokeWidth', 'duration', 'delay', 'easing', 'iteration'],
-	'stroke-draw': ['strokeColor', 'strokeWidth', 'duration', 'delay', 'easing', 'iteration'],
-	'text-shadow': ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'duration', 'delay', 'iteration'],
-	'glow': ['color', 'intensity', 'duration', 'delay', 'iteration'],
+	'highlight': ['highlightColor', 'duration', 'delay', 'easing', 'direction', 'splitBy', 'stagger', 'iteration'],
+	'underline-draw': ['color', 'strokeWidth', 'duration', 'delay', 'easing', 'splitBy', 'stagger', 'iteration'],
+	'stroke-draw': ['strokeColor', 'strokeWidth', 'duration', 'delay', 'easing', 'splitBy', 'stagger', 'iteration'],
+	'text-shadow': ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'duration', 'delay', 'splitBy', 'stagger', 'iteration'],
+	'glow': ['color', 'intensity', 'duration', 'delay', 'splitBy', 'stagger', 'iteration'],
 	'rainbow': ['colors', 'duration', 'delay', 'iteration'],
 	'shimmer': ['shineColor', 'duration', 'delay', 'iteration']
 };
@@ -246,6 +246,56 @@ export const LOOP_BY_DEFAULT = [
 ];
 
 /**
+ * Motion curves. Entrances want a hard decelerate: the element covers most of its distance
+ * immediately and settles softly, which reads as responsive rather than sluggish. A
+ * symmetric `ease` makes every entrance feel the same and slightly limp, so it is no longer
+ * the default for them.
+ */
+export const EASINGS = {
+	decelerate: 'cubic-bezier(0.05, 0.7, 0.1, 1)',
+	overshoot: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+	spring: 'cubic-bezier(0.22, 1.2, 0.36, 1)',
+	smooth: 'cubic-bezier(0.65, 0, 0.35, 1)',
+	snappy: 'cubic-bezier(0.4, 0, 0.2, 1)',
+	softIn: 'cubic-bezier(0.32, 0, 0.67, 0)'
+};
+
+export const EASING_PRESETS = [
+	{ label: __('Smooth Out (recommended)', 'inner-block-text-animation'), value: EASINGS.decelerate },
+	{ label: __('Gentle Overshoot', 'inner-block-text-animation'), value: EASINGS.overshoot },
+	{ label: __('Spring', 'inner-block-text-animation'), value: EASINGS.spring },
+	{ label: __('Smooth In Out', 'inner-block-text-animation'), value: EASINGS.smooth },
+	{ label: __('Snappy', 'inner-block-text-animation'), value: EASINGS.snappy },
+	{ label: __('Soft In', 'inner-block-text-animation'), value: EASINGS.softIn },
+	{ label: 'linear', value: 'linear' },
+	{ label: 'ease', value: 'ease' },
+	{ label: 'ease-in', value: 'ease-in' },
+	{ label: 'ease-out', value: 'ease-out' },
+	{ label: 'ease-in-out', value: 'ease-in-out' }
+];
+
+/**
+ * Split By is offered on every animation where per-part motion is technically sound. These
+ * four are only legible as per-character effects, so they default to splitting instead of to
+ * 'none' — which is also the behaviour they had when the mode was hard-coded in the engine.
+ * The user can still switch them to word, line or none.
+ */
+export const SPLIT_BY_DEFAULT = {
+	'wave': 'character',
+	'text-scatter': 'character',
+	'text-assemble': 'character',
+	'text-shatter': 'character'
+};
+
+// animations that read as an arrival, so they default to the decelerate curve
+export const ENTRANCE_ANIMATIONS = [
+	'fade-in', 'slide-up', 'slide-down', 'slide-left', 'slide-right', 'zoom-in', 'zoom-out',
+	'flip-x', 'flip-y', 'rotate-in', 'blur-in', 'mask-reveal', 'drop-in', 'swing-in',
+	'character-reveal', 'word-reveal', 'line-reveal', 'split', 'text-scatter', 'text-assemble',
+	'text-shatter', 'perspective'
+];
+
+/**
  * Rainbow's spectrum. It opens and closes on the same red so the scroll loops with no
  * colour jump; a custom gradient looks best when its first and last stops match too.
  */
@@ -259,6 +309,16 @@ export const getFieldDefault = (type, field) => {
 	// rainbow shares the `colors` field but defaults to the spectrum, not the blue gradient
 	if ('colors' === field && 'rainbow' === type) {
 		return RAINBOW_GRADIENT;
+	}
+
+	// arrivals decelerate; everything else keeps the symmetric default
+	if ('easing' === field && ENTRANCE_ANIMATIONS.includes(type)) {
+		return EASINGS.decelerate;
+	}
+
+	// these read as per-character effects, so they default to split rather than to 'none'
+	if ('splitBy' === field && SPLIT_BY_DEFAULT[type]) {
+		return SPLIT_BY_DEFAULT[type];
 	}
 
 	return FIELD_DEFAULTS[field];

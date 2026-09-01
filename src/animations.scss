@@ -1,6 +1,22 @@
 // Per-element animation output.
+//
 // Every rule reads its value from an inline custom property with a fallback, so one
-// element can never inherit or overwrite another element's settings (Section 16).
+// element can never inherit or overwrite another element's settings.
+//
+// Motion design notes:
+//  * Entrances are choreographed: opacity finishes around 55-65% so the text is fully
+//    readable while it is still settling. Coupling opacity 1:1 to the transform is what
+//    makes a stock CSS animation feel cheap.
+//  * Entrances expose an `easing` field, so their curve must come from --ibta-easing and
+//    they must NOT declare per-keyframe timing functions (that would silently override
+//    the user's choice).
+//  * Loops expose no `easing` field, so they DO use per-keyframe timing functions. That is
+//    what makes a bounce decelerate on the way up and accelerate on the way down instead
+//    of gliding mechanically.
+//  * Individual transform properties (translate/scale/rotate) are used instead of the
+//    `transform` shorthand wherever no perspective() is needed: they compose instead of
+//    overwriting, so a theme transform on the same element no longer cancels the animation.
+//    Baseline: Chrome 104+, Safari 14.1+, Firefox 72+.
 
 // name -> keyframes. Generated below so a new animation is one map entry, not three rules.
 $animations: (
@@ -72,11 +88,49 @@ $animations: (
 .ibta-part {
 	display: inline-block;
 	white-space: pre-wrap;
+
+	// a per-character motion blur would mean dozens of simultaneous blur surfaces, so the
+	// accent is spent on the whole-element case only
+	--ibta-motion-blur: 0px;
+
 	animation-duration: var(--ibta-duration, 1s);
 	animation-timing-function: var(--ibta-easing, ease);
 	animation-iteration-count: var(--ibta-iteration, 1);
 	animation-fill-mode: both;
 	animation-delay: calc(var(--ibta-delay, 0s) + var(--ibta-index, 0) * var(--ibta-stagger, 0.05s));
+}
+
+// gives split parts real depth to rotate through rather than a flat plane
+.ibta-is-split {
+	perspective: var(--ibta-perspective, 800px);
+	transform-style: preserve-3d;
+}
+
+/**
+ * Styling that the keyframes depend on has to reach the parts too. A transform-origin, a
+ * baked timing function or a painted background that only lands on the parent means the
+ * animation quietly changes character the moment Split By is switched on.
+ */
+@mixin element-and-parts($name) {
+	.ibta-anim--#{$name},
+	.ibta-anim--#{$name}.ibta-is-split .ibta-part {
+		@content;
+	}
+}
+
+/**
+ * Direction picks a different keyframes name. The generated split rule assigns the base
+ * keyframes to every part, so each direction has to be restated for parts or Direction
+ * silently stops working once the text is split.
+ */
+@mixin direction-parts($name, $dir, $keyframes) {
+	.ibta-anim--#{$name}.ibta-dir--#{$dir} {
+		animation-name: $keyframes;
+	}
+
+	.ibta-anim--#{$name}.ibta-dir--#{$dir}.ibta-is-split .ibta-part {
+		animation-name: $keyframes;
+	}
 }
 
 @each $name, $keyframes in $animations {
@@ -94,147 +148,194 @@ $animations: (
 }
 
 // ---------- Entrance ----------
+// No per-keyframe timing functions here: these animations expose `easing`.
 
 @keyframes ibtaFadeIn {
-	from { opacity: 0; }
-	to { opacity: 1; }
+	from { opacity: 0; scale: 0.985; }
+	60% { opacity: 1; }
+	to { opacity: 1; scale: 1; }
 }
 
 @keyframes ibtaSlideUp {
-	from { opacity: 0; transform: translateY(var(--ibta-distance, 40px)); }
-	to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		translate: 0 var(--ibta-distance, 40px);
+		scale: 0.98;
+		filter: blur(var(--ibta-motion-blur, 2px));
+	}
+	55% { opacity: 1; }
+	to { opacity: 1; translate: 0 0; scale: 1; filter: none; }
 }
 
 @keyframes ibtaSlideDown {
-	from { opacity: 0; transform: translateY(calc(var(--ibta-distance, 40px) * -1)); }
-	to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		translate: 0 calc(var(--ibta-distance, 40px) * -1);
+		scale: 0.98;
+		filter: blur(var(--ibta-motion-blur, 2px));
+	}
+	55% { opacity: 1; }
+	to { opacity: 1; translate: 0 0; scale: 1; filter: none; }
 }
 
 @keyframes ibtaSlideLeft {
-	from { opacity: 0; transform: translateX(var(--ibta-distance, 40px)); }
-	to { opacity: 1; transform: translateX(0); }
+	from {
+		opacity: 0;
+		translate: var(--ibta-distance, 40px) 0;
+		scale: 0.98;
+		filter: blur(var(--ibta-motion-blur, 2px));
+	}
+	55% { opacity: 1; }
+	to { opacity: 1; translate: 0 0; scale: 1; filter: none; }
 }
 
 @keyframes ibtaSlideRight {
-	from { opacity: 0; transform: translateX(calc(var(--ibta-distance, 40px) * -1)); }
-	to { opacity: 1; transform: translateX(0); }
+	from {
+		opacity: 0;
+		translate: calc(var(--ibta-distance, 40px) * -1) 0;
+		scale: 0.98;
+		filter: blur(var(--ibta-motion-blur, 2px));
+	}
+	55% { opacity: 1; }
+	to { opacity: 1; translate: 0 0; scale: 1; filter: none; }
 }
 
-// scale is the extreme; dividing keeps it positive for every value in the 0.1-3 range
+// scale is the extreme; dividing keeps it positive across the whole 0.1-3 range
 @keyframes ibtaZoomIn {
-	from { opacity: 0; transform: scale(calc(1 / var(--ibta-scale, 1.2))); }
-	to { opacity: 1; transform: scale(1); }
+	from { opacity: 0; scale: calc(1 / var(--ibta-scale, 1.2)); }
+	55% { opacity: 1; }
+	to { opacity: 1; scale: 1; }
 }
 
 @keyframes ibtaZoomOut {
-	from { opacity: 0; transform: scale(var(--ibta-scale, 1.2)); }
-	to { opacity: 1; transform: scale(1); }
+	from { opacity: 0; scale: var(--ibta-scale, 1.2); }
+	55% { opacity: 1; }
+	to { opacity: 1; scale: 1; }
 }
 
+// a flip that also drops back in Z reads as a real card turning rather than a squash
 @keyframes ibtaFlipX {
-	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateX(90deg); }
-	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateX(0); }
+	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateX(75deg) translateZ(-60px); }
+	55% { opacity: 1; }
+	80% { transform: perspective(var(--ibta-perspective, 800px)) rotateX(-6deg) translateZ(0); }
+	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateX(0) translateZ(0); }
 }
 
 @keyframes ibtaFlipY {
-	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateY(90deg); }
-	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateY(0); }
+	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateY(75deg) translateZ(-60px); }
+	55% { opacity: 1; }
+	80% { transform: perspective(var(--ibta-perspective, 800px)) rotateY(-6deg) translateZ(0); }
+	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateY(0) translateZ(0); }
 }
 
 .ibta-anim--flip-x,
-.ibta-anim--flip-y { backface-visibility: hidden; }
+.ibta-anim--flip-y,
+.ibta-anim--flip-x.ibta-is-split .ibta-part,
+.ibta-anim--flip-y.ibta-is-split .ibta-part { backface-visibility: hidden; }
 
 @keyframes ibtaRotateIn {
-	from { opacity: 0; transform: rotate(var(--ibta-angle, 20deg)); }
-	to { opacity: 1; transform: rotate(0); }
+	from { opacity: 0; rotate: var(--ibta-angle, 20deg); scale: 0.94; }
+	55% { opacity: 1; }
+	to { opacity: 1; rotate: 0deg; scale: 1; }
 }
 
 @keyframes ibtaBlurIn {
-	from { opacity: 0; filter: blur(var(--ibta-blur, 10px)); }
-	to { opacity: 1; filter: blur(0); }
+	from { opacity: 0; filter: blur(var(--ibta-blur, 10px)); scale: 1.04; }
+	60% { opacity: 1; }
+	to { opacity: 1; filter: none; scale: 1; }
 }
 
+// the wipe now travels with a slight drift, which reads far better than a bare clip
 @keyframes ibtaMaskReveal {
-	from { clip-path: inset(0 100% 0 0); }
-	to { clip-path: inset(0 0 0 0); }
+	from { clip-path: inset(0 100% 0 0); translate: -6px 0; }
+	to { clip-path: inset(0 0 0 0); translate: 0 0; }
 }
 
 @keyframes ibtaMaskRevealRight {
-	from { clip-path: inset(0 0 0 100%); }
-	to { clip-path: inset(0 0 0 0); }
+	from { clip-path: inset(0 0 0 100%); translate: 6px 0; }
+	to { clip-path: inset(0 0 0 0); translate: 0 0; }
 }
 
 @keyframes ibtaMaskRevealUp {
-	from { clip-path: inset(100% 0 0 0); }
-	to { clip-path: inset(0 0 0 0); }
+	from { clip-path: inset(100% 0 0 0); translate: 0 6px; }
+	to { clip-path: inset(0 0 0 0); translate: 0 0; }
 }
 
 @keyframes ibtaMaskRevealDown {
-	from { clip-path: inset(0 0 100% 0); }
-	to { clip-path: inset(0 0 0 0); }
+	from { clip-path: inset(0 0 100% 0); translate: 0 -6px; }
+	to { clip-path: inset(0 0 0 0); translate: 0 0; }
 }
 
-.ibta-anim--mask-reveal {
-	display: inline-block;
+.ibta-anim--mask-reveal { display: inline-block; }
 
-	&.ibta-dir--right { animation-name: ibtaMaskRevealRight; }
-	&.ibta-dir--up { animation-name: ibtaMaskRevealUp; }
-	&.ibta-dir--down { animation-name: ibtaMaskRevealDown; }
-}
+@include direction-parts('mask-reveal', 'right', ibtaMaskRevealRight);
+@include direction-parts('mask-reveal', 'up', ibtaMaskRevealUp);
+@include direction-parts('mask-reveal', 'down', ibtaMaskRevealDown);
 
+// falls fast, compresses on impact, then recovers: squash-and-stretch
 @keyframes ibtaDropIn {
-	from { opacity: 0; transform: translateY(calc(var(--ibta-distance, 40px) * -1)) scale(1.1); }
-	60% { opacity: 1; transform: translateY(0) scale(1); }
-	80% { transform: translateY(calc(var(--ibta-distance, 40px) * 0.1)); }
-	to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		translate: 0 calc(var(--ibta-distance, 40px) * -1);
+		scale: 1.08 0.92;
+		filter: blur(var(--ibta-motion-blur, 2px));
+	}
+	50% { opacity: 1; filter: none; }
+	62% { translate: 0 0; scale: 1.1 0.86; }
+	78% { translate: 0 calc(var(--ibta-distance, 40px) * -0.08); scale: 0.96 1.05; }
+	90% { translate: 0 0; scale: 1.02 0.98; }
+	to { opacity: 1; translate: 0 0; scale: 1 1; }
 }
 
+// baked spring curves: these two expose no easing field, so per-keyframe functions are safe
 @keyframes ibtaElasticIn {
-	from { opacity: 0; transform: translateY(var(--ibta-distance, 40px)); }
-	60% { opacity: 1; transform: translateY(calc(var(--ibta-distance, 40px) * -0.25)); }
-	80% { transform: translateY(calc(var(--ibta-distance, 40px) * 0.12)); }
-	to { opacity: 1; transform: translateY(0); }
+	from { opacity: 0; translate: 0 var(--ibta-distance, 40px); animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+	45% { opacity: 1; translate: 0 calc(var(--ibta-distance, 40px) * -0.28); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+	65% { translate: 0 calc(var(--ibta-distance, 40px) * 0.14); }
+	80% { translate: 0 calc(var(--ibta-distance, 40px) * -0.06); }
+	92% { translate: 0 calc(var(--ibta-distance, 40px) * 0.02); }
+	to { opacity: 1; translate: 0 0; }
 }
 
 @keyframes ibtaBounceIn {
-	from { opacity: 0; transform: translateY(var(--ibta-distance, 40px)) scale(0.9); }
-	50% { opacity: 1; transform: translateY(calc(var(--ibta-distance, 40px) * -0.3)) scale(1.03); }
-	75% { transform: translateY(calc(var(--ibta-distance, 40px) * 0.15)); }
-	to { opacity: 1; transform: translateY(0) scale(1); }
+	from { opacity: 0; translate: 0 var(--ibta-distance, 40px); scale: 0.9; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+	45% { opacity: 1; translate: 0 calc(var(--ibta-distance, 40px) * -0.32); scale: 1.04; animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0); }
+	68% { translate: 0 0; scale: 0.97 1.03; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+	84% { translate: 0 calc(var(--ibta-distance, 40px) * -0.12); scale: 1.01; }
+	to { opacity: 1; translate: 0 0; scale: 1; }
 }
-
-// these two omit the easing field: their timing function is baked in (Section 7.3)
-.ibta-anim--elastic-in,
-.ibta-anim--elastic-in.ibta-is-split .ibta-part { animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-.ibta-anim--bounce-in,
-.ibta-anim--bounce-in.ibta-is-split .ibta-part { animation-timing-function: cubic-bezier(0.22, 1.2, 0.36, 1); }
 
 @keyframes ibtaSwingIn {
-	from { opacity: 0; transform: rotate(var(--ibta-angle, 20deg)); }
-	60% { opacity: 1; transform: rotate(calc(var(--ibta-angle, 20deg) * -0.3)); }
-	80% { transform: rotate(calc(var(--ibta-angle, 20deg) * 0.15)); }
-	to { opacity: 1; transform: rotate(0); }
+	from { opacity: 0; rotate: var(--ibta-angle, 20deg); }
+	50% { opacity: 1; rotate: calc(var(--ibta-angle, 20deg) * -0.35); }
+	72% { rotate: calc(var(--ibta-angle, 20deg) * 0.18); }
+	88% { rotate: calc(var(--ibta-angle, 20deg) * -0.07); }
+	to { opacity: 1; rotate: 0deg; }
 }
 
-.ibta-anim--swing-in { transform-origin: top center; }
+@include element-and-parts('swing-in') { transform-origin: top center; }
 
 // ---------- Typing ----------
 
+// parts rise, un-blur and settle rather than simply appearing
 @keyframes ibtaPartReveal {
-	from { opacity: 0; transform: translateY(0.4em); }
-	to { opacity: 1; transform: translateY(0); }
+	from { opacity: 0; translate: 0 0.45em; scale: 0.9; filter: blur(3px); }
+	60% { opacity: 1; filter: none; }
+	to { opacity: 1; translate: 0 0; scale: 1; filter: none; }
 }
 
+// a real caret holds solid while typing, so a soft square blink beats a hard on/off
 @keyframes ibtaCaretBlink {
-	0%, 49% { opacity: 1; }
-	50%, 100% { opacity: 0; }
+	0%, 45% { opacity: 1; }
+	50%, 95% { opacity: 0.15; }
+	100% { opacity: 1; }
 }
 
 .ibta-has-cursor::after {
 	content: var(--ibta-cursor-char, '|');
-	animation: ibtaCaretBlink 1s step-end infinite;
-	margin-left: 0.05em;
+	animation: ibtaCaretBlink 1.06s steps(1, end) infinite;
+	margin-left: 0.06em;
+	font-weight: 400;
 }
 
 .ibta-anim--terminal::before {
@@ -257,15 +358,16 @@ $animations: (
 .ibta-anim--text-decode .ibta-part { animation-name: ibtaFadeIn; }
 
 // ---------- Loop ----------
+// These expose no `easing` field, so per-keyframe timing functions shape the physics.
 
 @keyframes ibtaMarquee {
-	from { transform: translateX(0); }
-	to { transform: translateX(calc(-50% - var(--ibta-gap, 40px) / 2)); }
+	from { translate: 0 0; }
+	to { translate: calc(-50% - var(--ibta-gap, 40px) / 2) 0; }
 }
 
 @keyframes ibtaMarqueeFallback {
-	from { transform: translateX(0); }
-	to { transform: translateX(-100%); }
+	from { translate: 0 0; }
+	to { translate: -100% 0; }
 }
 
 .ibta-anim--marquee {
@@ -295,106 +397,151 @@ $animations: (
 	&.ibta-dir--right .ibta-marquee-track { animation-direction: reverse; }
 }
 
+// gravity: slow at the crest, quick through the trough
 @keyframes ibtaWave {
-	0%, 100% { transform: translateY(0); }
-	50% { transform: translateY(calc(var(--ibta-amplitude, 10px) * -1)); }
+	0%, 100% { translate: 0 0; animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+	50% { translate: 0 calc(var(--ibta-amplitude, 10px) * -1); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
 }
 
 @keyframes ibtaBounce {
-	0%, 100% { transform: translateY(0); }
-	50% { transform: translateY(calc(var(--ibta-amplitude, 10px) * -1)); }
+	0%, 100% { translate: 0 0; scale: 1.02 0.98; animation-timing-function: cubic-bezier(0.2, 0, 0.35, 0); }
+	8% { scale: 1 1; }
+	50% { translate: 0 calc(var(--ibta-amplitude, 10px) * -1); scale: 0.98 1.02; animation-timing-function: cubic-bezier(0.65, 1, 0.8, 1); }
 }
 
 @keyframes ibtaFloat {
-	0%, 100% { transform: translateY(0); }
-	50% { transform: translateY(calc(var(--ibta-amplitude, 10px) * -1)); }
+	0%, 100% { translate: 0 0; animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1); }
+	50% { translate: 0 calc(var(--ibta-amplitude, 10px) * -1); animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1); }
 }
-
-.ibta-anim--float { animation-timing-function: ease-in-out; }
 
 @keyframes ibtaPulse {
-	0%, 100% { transform: scale(1); }
-	50% { transform: scale(var(--ibta-scale, 1.2)); }
+	0%, 100% { scale: 1; animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+	50% { scale: var(--ibta-scale, 1.2); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
 }
 
+// a real shake decays instead of repeating at constant force
 @keyframes ibtaShake {
-	0%, 100% { transform: translateX(0); }
-	20%, 60% { transform: translateX(calc(var(--ibta-amplitude, 10px) * -1)); }
-	40%, 80% { transform: translateX(var(--ibta-amplitude, 10px)); }
+	0%, 100% { translate: 0 0; }
+	10% { translate: calc(var(--ibta-amplitude, 10px) * -1) 0; }
+	20% { translate: var(--ibta-amplitude, 10px) 0; }
+	32% { translate: calc(var(--ibta-amplitude, 10px) * -0.7) 0; }
+	44% { translate: calc(var(--ibta-amplitude, 10px) * 0.7) 0; }
+	56% { translate: calc(var(--ibta-amplitude, 10px) * -0.4) 0; }
+	68% { translate: calc(var(--ibta-amplitude, 10px) * 0.4) 0; }
+	80% { translate: calc(var(--ibta-amplitude, 10px) * -0.15) 0; }
+	90% { translate: calc(var(--ibta-amplitude, 10px) * 0.15) 0; }
 }
 
+// chromatic aberration plus scanline slicing, which is what sells a glitch
 @keyframes ibtaGlitch {
 	0%, 100% {
-		transform: translate(0);
+		translate: 0 0;
 		text-shadow: none;
+		clip-path: inset(0 0 0 0);
 	}
-	20% {
-		transform: translateX(calc(var(--ibta-intensity, 50) * -0.04px));
-		text-shadow: calc(var(--ibta-intensity, 50) * 0.04px) 0 var(--ibta-color, #146EF5), calc(var(--ibta-intensity, 50) * -0.04px) 0 var(--ibta-color-alt, #ff0040);
+	14% {
+		translate: calc(var(--ibta-intensity, 50) * -0.05px) 0;
+		text-shadow: calc(var(--ibta-intensity, 50) * 0.05px) 0 var(--ibta-color, #146EF5), calc(var(--ibta-intensity, 50) * -0.05px) 0 var(--ibta-color-alt, #ff0040);
+		clip-path: inset(12% 0 58% 0);
 	}
-	40% {
-		transform: translateX(calc(var(--ibta-intensity, 50) * 0.04px));
-		text-shadow: calc(var(--ibta-intensity, 50) * -0.04px) 0 var(--ibta-color, #146EF5), calc(var(--ibta-intensity, 50) * 0.04px) 0 var(--ibta-color-alt, #ff0040);
+	28% {
+		translate: calc(var(--ibta-intensity, 50) * 0.05px) 0;
+		text-shadow: calc(var(--ibta-intensity, 50) * -0.05px) 0 var(--ibta-color, #146EF5), calc(var(--ibta-intensity, 50) * 0.05px) 0 var(--ibta-color-alt, #ff0040);
+		clip-path: inset(64% 0 12% 0);
 	}
-	60% {
-		transform: translateY(calc(var(--ibta-intensity, 50) * 0.02px));
+	42% {
+		translate: calc(var(--ibta-intensity, 50) * -0.03px) 0;
+		text-shadow: calc(var(--ibta-intensity, 50) * 0.03px) 0 var(--ibta-color-alt, #ff0040);
+		clip-path: inset(38% 0 34% 0);
+	}
+	56% {
+		translate: 0 calc(var(--ibta-intensity, 50) * 0.02px);
 		text-shadow: 0 calc(var(--ibta-intensity, 50) * 0.03px) var(--ibta-color-alt, #ff0040);
+		clip-path: inset(0 0 0 0);
 	}
-	80% {
-		transform: translate(0);
+	70% {
+		translate: calc(var(--ibta-intensity, 50) * 0.02px) 0;
 		text-shadow: calc(var(--ibta-intensity, 50) * 0.02px) 0 var(--ibta-color, #146EF5);
+		clip-path: inset(76% 0 6% 0);
+	}
+	84% {
+		translate: 0 0;
+		text-shadow: none;
+		clip-path: inset(0 0 0 0);
 	}
 }
 
-// intensity is unitless so it can be multiplied by a px unit here
+// irregular timing is what makes a failing tube read as a failing tube
 @keyframes ibtaNeonFlicker {
-	0%, 100% { opacity: 1; text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.2px) var(--ibta-color, #146EF5); }
+	0%, 100% {
+		opacity: 1;
+		text-shadow:
+			0 0 calc(var(--ibta-intensity, 50) * 0.08px) var(--ibta-color, #146EF5),
+			0 0 calc(var(--ibta-intensity, 50) * 0.22px) var(--ibta-color, #146EF5),
+			0 0 calc(var(--ibta-intensity, 50) * 0.44px) var(--ibta-color, #146EF5);
+	}
+	8% { opacity: 0.72; text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.1px) var(--ibta-color, #146EF5); }
+	10% { opacity: 1; }
+	38% { opacity: 1; }
+	40% { opacity: 0.28; text-shadow: none; }
 	42% { opacity: 1; }
-	43% { opacity: 0.4; text-shadow: none; }
-	45% { opacity: 1; }
-	62% { opacity: 0.6; text-shadow: none; }
-	64% { opacity: 1; }
+	54% { opacity: 0.62; text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.06px) var(--ibta-color, #146EF5); }
+	56% { opacity: 1; }
+	72% { opacity: 0.4; text-shadow: none; }
+	74% { opacity: 1; }
+	90% { opacity: 0.86; }
+	92% { opacity: 1; }
 }
 
 @keyframes ibtaJello {
-	0%, 100% { transform: skewX(0) skewY(0); }
-	30% { transform: skewX(-12deg) skewY(-6deg); }
-	60% { transform: skewX(6deg) skewY(3deg); }
+	0%, 100% { rotate: 0deg; scale: 1 1; }
+	22% { scale: 1.12 0.88; }
+	38% { scale: 0.9 1.1; }
+	54% { scale: 1.06 0.94; }
+	70% { scale: 0.97 1.03; }
+	85% { scale: 1.02 0.98; }
 }
 
+// two beats then a rest, like an actual pulse
 @keyframes ibtaHeartbeat {
-	0%, 100% { transform: scale(1); }
-	25% { transform: scale(var(--ibta-scale, 1.2)); }
-	40% { transform: scale(1); }
-	60% { transform: scale(var(--ibta-scale, 1.2)); }
+	0% { scale: 1; animation-timing-function: cubic-bezier(0.2, 0, 0.3, 1); }
+	14% { scale: var(--ibta-scale, 1.2); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 1); }
+	28% { scale: 1; animation-timing-function: cubic-bezier(0.2, 0, 0.3, 1); }
+	42% { scale: calc(1 + (var(--ibta-scale, 1.2) - 1) * 0.7); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 1); }
+	58%, 100% { scale: 1; }
 }
 
 @keyframes ibtaSwing {
-	0%, 100% { transform: rotate(0); }
-	25% { transform: rotate(var(--ibta-angle, 20deg)); }
-	75% { transform: rotate(calc(var(--ibta-angle, 20deg) * -1)); }
+	0%, 100% { rotate: 0deg; animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+	25% { rotate: var(--ibta-angle, 20deg); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+	75% { rotate: calc(var(--ibta-angle, 20deg) * -1); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
 }
 
-.ibta-anim--swing { transform-origin: top center; }
+@include element-and-parts('swing') { transform-origin: top center; }
 
 @keyframes ibtaWobble {
-	0%, 100% { transform: translateX(0) rotate(0); }
-	25% { transform: translateX(calc(var(--ibta-amplitude, 10px) * -1)) rotate(-4deg); }
-	75% { transform: translateX(var(--ibta-amplitude, 10px)) rotate(4deg); }
+	0%, 100% { translate: 0 0; rotate: 0deg; }
+	15% { translate: calc(var(--ibta-amplitude, 10px) * -1) 0; rotate: -5deg; }
+	30% { translate: calc(var(--ibta-amplitude, 10px) * 0.8) 0; rotate: 3deg; }
+	45% { translate: calc(var(--ibta-amplitude, 10px) * -0.6) 0; rotate: -3deg; }
+	60% { translate: calc(var(--ibta-amplitude, 10px) * 0.4) 0; rotate: 2deg; }
+	75% { translate: calc(var(--ibta-amplitude, 10px) * -0.2) 0; rotate: -1deg; }
 }
 
 @keyframes ibtaTada {
-	0%, 100% { transform: scale(1) rotate(0); }
-	20% { transform: scale(0.92) rotate(-3deg); }
-	40%, 60%, 80% { transform: scale(1.1) rotate(3deg); }
-	50%, 70% { transform: scale(1.1) rotate(-3deg); }
+	0%, 100% { scale: 1; rotate: 0deg; }
+	10%, 20% { scale: 0.9; rotate: -3deg; }
+	30%, 50%, 70%, 90% { scale: 1.1; rotate: 3deg; }
+	40%, 60%, 80% { scale: 1.1; rotate: -3deg; }
 }
 
 @keyframes ibtaRubberBand {
-	0%, 100% { transform: scale(1, 1); }
-	30% { transform: scale(1.25, 0.75); }
-	40% { transform: scale(0.75, 1.25); }
-	60% { transform: scale(1.15, 0.85); }
+	0%, 100% { scale: 1 1; animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+	30% { scale: 1.25 0.75; }
+	40% { scale: 0.75 1.25; }
+	50% { scale: 1.15 0.85; }
+	65% { scale: 0.95 1.05; }
+	75% { scale: 1.05 0.95; }
 }
 
 .ibta-anim--bounce,
@@ -412,23 +559,28 @@ $animations: (
 
 // ---------- Creative ----------
 
+// letter-spacing is a layout property, so this stays a short one-shot rather than a loop
 @keyframes ibtaSplit {
-	from { clip-path: inset(0 50% 0 50%); letter-spacing: calc(var(--ibta-distance, 40px) * 0.1); opacity: 0; }
-	to { clip-path: inset(0 0 0 0); letter-spacing: normal; opacity: 1; }
+	from {
+		opacity: 0;
+		clip-path: inset(0 50% 0 50%);
+		letter-spacing: calc(var(--ibta-distance, 40px) * 0.1);
+	}
+	55% { opacity: 1; }
+	to { opacity: 1; clip-path: inset(0 0 0 0); letter-spacing: normal; }
 }
 
 @keyframes ibtaSplitVertical {
-	from { clip-path: inset(50% 0 50% 0); opacity: 0; }
-	to { clip-path: inset(0 0 0 0); opacity: 1; }
+	from { opacity: 0; clip-path: inset(50% 0 50% 0); scale: 1 0.7; }
+	55% { opacity: 1; }
+	to { opacity: 1; clip-path: inset(0 0 0 0); scale: 1 1; }
 }
 
-.ibta-anim--split {
-	display: inline-block;
+.ibta-anim--split { display: inline-block; }
 
-	// direction chooses which axis the text opens along
-	&.ibta-dir--up,
-	&.ibta-dir--down { animation-name: ibtaSplitVertical; }
-}
+// direction chooses which axis the text opens along
+@include direction-parts('split', 'up', ibtaSplitVertical);
+@include direction-parts('split', 'down', ibtaSplitVertical);
 
 // The engine assigns a random --ibta-rx / --ibta-ry / --ibta-rr per part. The fallbacks are
 // deliberately non-zero so an unsplit element (the editor preview) still moves instead of
@@ -437,41 +589,55 @@ $animations: (
 @keyframes ibtaScatter {
 	from {
 		opacity: 0;
-		transform: translate(calc(var(--ibta-rx, 0.7) * var(--ibta-distance, 40px)), calc(var(--ibta-ry, -0.7) * var(--ibta-distance, 40px))) rotate(calc(var(--ibta-rr, 0.5) * 90deg));
+		translate: calc(var(--ibta-rx, 0.7) * var(--ibta-distance, 40px)) calc(var(--ibta-ry, -0.7) * var(--ibta-distance, 40px));
+		rotate: calc(var(--ibta-rr, 0.5) * 90deg);
+		scale: 0.6;
+		filter: blur(var(--ibta-motion-blur, 3px));
 	}
-	to { opacity: 1; transform: translate(0, 0) rotate(0); }
+	60% { opacity: 1; filter: none; }
+	to { opacity: 1; translate: 0 0; rotate: 0deg; scale: 1; filter: none; }
 }
 
 // assemble converges by translation only, which keeps it distinct from scatter's rotation
 @keyframes ibtaAssemble {
 	from {
 		opacity: 0;
-		transform: translate(calc(var(--ibta-rx, -0.8) * var(--ibta-distance, 40px)), calc(var(--ibta-ry, 0.8) * var(--ibta-distance, 40px)));
+		translate: calc(var(--ibta-rx, -0.8) * var(--ibta-distance, 40px)) calc(var(--ibta-ry, 0.8) * var(--ibta-distance, 40px));
+		filter: blur(var(--ibta-motion-blur, 3px));
 	}
-	to { opacity: 1; transform: translate(0, 0); }
+	60% { opacity: 1; filter: none; }
+	to { opacity: 1; translate: 0 0; filter: none; }
 }
 
 @keyframes ibtaShatter {
 	0% {
 		opacity: 0;
-		transform: translate(calc(var(--ibta-rx, 0.6) * var(--ibta-distance, 40px)), calc(var(--ibta-distance, 40px) * 1.5)) rotate(calc(var(--ibta-rr, 0.8) * 120deg)) scale(0.6);
+		translate: calc(var(--ibta-rx, 0.6) * var(--ibta-distance, 40px)) calc(var(--ibta-distance, 40px) * 1.5);
+		rotate: calc(var(--ibta-rr, 0.8) * 120deg);
+		scale: 0.6;
 	}
-	60% { opacity: 1; }
-	100% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+	55% { opacity: 1; }
+	82% { translate: 0 calc(var(--ibta-distance, 40px) * -0.06); rotate: -2deg; scale: 1.03; }
+	100% { opacity: 1; translate: 0 0; rotate: 0deg; scale: 1; }
 }
 
 @keyframes ibtaPerspective {
-	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateX(var(--ibta-angle, 20deg)) translateZ(-100px); }
+	from { opacity: 0; transform: perspective(var(--ibta-perspective, 800px)) rotateX(var(--ibta-angle, 20deg)) translateZ(-140px); }
+	55% { opacity: 1; }
+	82% { transform: perspective(var(--ibta-perspective, 800px)) rotateX(calc(var(--ibta-angle, 20deg) * -0.12)) translateZ(12px); }
 	to { opacity: 1; transform: perspective(var(--ibta-perspective, 800px)) rotateX(0) translateZ(0); }
 }
 
+// angle tilts the axis the spin happens around
 @keyframes ibtaRotate3d {
-	// angle tilts the axis the spin happens around
 	from { transform: perspective(var(--ibta-perspective, 800px)) rotateX(var(--ibta-angle, 20deg)) rotateY(0); }
 	to { transform: perspective(var(--ibta-perspective, 800px)) rotateX(var(--ibta-angle, 20deg)) rotateY(360deg); }
 }
 
-.ibta-anim--3d-rotate { animation-timing-function: linear; }
+@include element-and-parts('3d-rotate') {
+	animation-timing-function: linear;
+	transform-style: preserve-3d;
+}
 
 // ---------- Style ----------
 
@@ -501,13 +667,14 @@ $animations: (
 }
 
 @keyframes ibtaColorShift {
-	0%, 100% { background-position: 0% 50%; }
-	50% { background-position: 100% 50%; }
+	0%, 100% { background-position: 0% 50%; animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+	50% { background-position: 100% 50%; animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
 }
 
+// a narrow specular band that sweeps and rests, rather than a constant strobe
 @keyframes ibtaShine {
-	from { background-position: -150% 50%; }
-	to { background-position: 250% 50%; }
+	0% { background-position: -150% 50%; }
+	55%, 100% { background-position: 250% 50%; }
 }
 
 .ibta-anim--shine,
@@ -521,27 +688,42 @@ $animations: (
 	background-size: 250% 100%;
 }
 
+.ibta-anim--shine { animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
 @keyframes ibtaShimmer {
 	from { background-position: 150% 50%; }
 	to { background-position: -50% 50%; }
 }
 
+.ibta-anim--shimmer { animation-timing-function: linear; }
+
+// eased from the leading edge so it reads like a marker stroke
 @keyframes ibtaHighlight {
 	from { background-size: 0% 100%; }
 	to { background-size: 100% 100%; }
 }
 
-.ibta-anim--highlight {
-	display: inline;
+// the painted band is what the keyframes grow, so parts need it as well as the parent
+@include element-and-parts('highlight') {
 	background-image: linear-gradient(var(--ibta-highlight-color, #ffe066), var(--ibta-highlight-color, #ffe066));
 	background-repeat: no-repeat;
 	background-position: left center;
 	box-decoration-break: clone;
 	-webkit-box-decoration-break: clone;
+}
+
+.ibta-anim--highlight {
+	display: inline;
 
 	&.ibta-dir--right { background-position: right center; }
 	&.ibta-dir--up,
 	&.ibta-dir--down { background-position: center; }
+
+	&.ibta-is-split .ibta-part { background-size: 0% 100%; }
+
+	&.ibta-dir--right.ibta-is-split .ibta-part { background-position: right center; }
+	&.ibta-dir--up.ibta-is-split .ibta-part,
+	&.ibta-dir--down.ibta-is-split .ibta-part { background-position: center; }
 }
 
 @keyframes ibtaUnderlineDraw {
@@ -549,40 +731,56 @@ $animations: (
 	to { background-size: 100% var(--ibta-stroke-width, 2px); }
 }
 
-.ibta-anim--underline-draw {
-	display: inline;
+// split by word and each word draws its own underline in sequence
+@include element-and-parts('underline-draw') {
 	background-image: linear-gradient(var(--ibta-color, #146EF5), var(--ibta-color, #146EF5));
 	background-repeat: no-repeat;
 	background-position: left bottom;
 	padding-bottom: 0.08em;
 }
 
+.ibta-anim--underline-draw { display: inline; }
+
+// fades the fill out as the outline comes in, so the glyphs read as being drawn
 @keyframes ibtaStrokeDraw {
-	from { -webkit-text-stroke-width: 0; opacity: 0.3; }
-	to { -webkit-text-stroke-width: var(--ibta-stroke-width, 2px); opacity: 1; }
+	from { -webkit-text-stroke-width: 0; opacity: 0.25; letter-spacing: 0.04em; }
+	60% { opacity: 1; }
+	to { -webkit-text-stroke-width: var(--ibta-stroke-width, 2px); opacity: 1; letter-spacing: normal; }
 }
 
-.ibta-anim--stroke-draw {
+@include element-and-parts('stroke-draw') {
 	display: inline-block;
 	-webkit-text-stroke-color: var(--ibta-stroke-color, currentColor);
 }
 
 @keyframes ibtaTextShadow {
-	from { text-shadow: 0 0 0 var(--ibta-shadow-color, rgba(0, 0, 0, .4)); }
+	from { text-shadow: 0 0 0 var(--ibta-shadow-color, rgba(0, 0, 0, .4)); translate: 0 0; }
 	to {
 		text-shadow: var(--ibta-shadow-x, 2px) var(--ibta-shadow-y, 2px) var(--ibta-shadow-blur, 4px) var(--ibta-shadow-color, rgba(0, 0, 0, .4));
+		translate: calc(var(--ibta-shadow-x, 2px) * -0.25) calc(var(--ibta-shadow-y, 2px) * -0.25);
 	}
 }
 
+// layered bloom: a tight core plus a wide halo is what makes a glow look lit rather than blurred
 @keyframes ibtaGlow {
-	0%, 100% { text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.1px) var(--ibta-color, #146EF5); }
-	50% { text-shadow: 0 0 calc(var(--ibta-intensity, 50) * 0.4px) var(--ibta-color, #146EF5); }
+	0%, 100% {
+		text-shadow:
+			0 0 calc(var(--ibta-intensity, 50) * 0.04px) var(--ibta-color, #146EF5),
+			0 0 calc(var(--ibta-intensity, 50) * 0.12px) var(--ibta-color, #146EF5);
+		animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+	}
+	50% {
+		text-shadow:
+			0 0 calc(var(--ibta-intensity, 50) * 0.1px) var(--ibta-color, #146EF5),
+			0 0 calc(var(--ibta-intensity, 50) * 0.28px) var(--ibta-color, #146EF5),
+			0 0 calc(var(--ibta-intensity, 50) * 0.55px) var(--ibta-color, #146EF5);
+		animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+	}
 }
 
 // Rainbow paints its own spectrum rather than hue-rotating the existing colour:
 // hue-rotate is a no-op on achromatic text, so on default near-black body copy it
-// produced no visible change at all. The gradient starts and ends on the same red so
-// the loop is seamless.
+// produced no visible change at all.
 @keyframes ibtaRainbow {
 	from { background-position: 0% 50%; }
 	to { background-position: 100% 50%; }
@@ -602,10 +800,18 @@ $animations: (
 .ibta-pause-hover:hover,
 .ibta-pause-hover:hover .ibta-marquee-track { animation-play-state: paused; }
 
+// Respect the OS setting: hold every element at its finished state rather than mid-animation.
 @media (prefers-reduced-motion: reduce) {
 	.ibta-anim,
 	.ibta-part,
 	.ibta-marquee-track {
 		animation: none !important;
+		opacity: 1 !important;
+		translate: none !important;
+		rotate: none !important;
+		scale: none !important;
+		transform: none !important;
+		filter: none !important;
+		clip-path: none !important;
 	}
 }

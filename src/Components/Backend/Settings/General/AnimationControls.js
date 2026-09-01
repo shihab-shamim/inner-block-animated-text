@@ -3,18 +3,11 @@ import { useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { Button, ColorPalette, GradientPicker, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
 
-import { ANIMATION_OPTIONS, RAINBOW_GRADIENT, getElementAnimation, getFieldValue, getVisibleFields } from '../../../../utils/animation';
+import { ANIMATION_OPTIONS, EASING_PRESETS, RAINBOW_GRADIENT, getElementAnimation, getFieldValue, getVisibleFields } from '../../../../utils/animation';
+import { Notice } from '../../../../../../bpl-tools/Components';
 import { previewAnimation } from '../../../../utils/animationPreview';
 
-const easingOptions = [
-	{ label: 'linear', value: 'linear' },
-	{ label: 'ease', value: 'ease' },
-	{ label: 'ease-in', value: 'ease-in' },
-	{ label: 'ease-out', value: 'ease-out' },
-	{ label: 'ease-in-out', value: 'ease-in-out' },
-	{ label: __('Back Out', 'inner-block-text-animation'), value: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
-	{ label: __('Smooth', 'inner-block-text-animation'), value: 'cubic-bezier(0.65, 0, 0.35, 1)' }
-];
+const easingOptions = EASING_PRESETS;
 
 const directionOptions = ['up', 'down', 'left', 'right'].map(v => ({ label: v, value: v }));
 const splitByOptions = ['none', 'character', 'word', 'line'].map(v => ({ label: v, value: v }));
@@ -157,10 +150,16 @@ const AnimationControls = ({ element, blockAttributes }) => {
 
 		{fields.map(renderField)}
 
-		{animation.type && <Button className='mt10 ibtaPreviewButton' variant='secondary' icon='controls-play'
-			onClick={() => previewAnimation(element.clientId)}>
-			{__('Preview Animation', 'inner-block-text-animation')}
-		</Button>}
+		{animation.type && <>
+			<Button className='mt10 ibtaPreviewButton' variant='secondary' icon='controls-play'
+				onClick={() => previewAnimation(element.clientId)}>
+				{__('Preview Animation', 'inner-block-text-animation')}
+			</Button>
+
+			<Notice className='ibtaPreviewNote' status='info'>
+				{__('Effects that split or retype the text cannot run on live editable text without risking your content, so the editor shows them still. This plays the animation exactly as visitors will see it, on a temporary copy.', 'inner-block-text-animation')}
+			</Notice>
+		</>}
 	</>;
 };
 

@@ -76,3 +76,15 @@ $primaryColor: #4527a4;
 	justify-content: center;
 	width: 100%;
 }
+
+.ibtaElementsNote {
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.ibtaPreviewNote {
+	// passing a className replaces the component's own default margin class
+	margin-top: 14px;
+	font-size: 12px;
+	line-height: 1.5;
+}

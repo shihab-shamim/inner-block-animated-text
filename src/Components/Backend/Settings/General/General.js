@@ -5,6 +5,7 @@ import { useSelect } from '@wordpress/data';
 import { getBlockContent } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
+import { Notice } from '../../../../../../bpl-tools/Components';
 import { getOrdinal } from '../../../../utils/functions';
 import AnimationControls from './AnimationControls';
 
@@ -50,6 +51,12 @@ const General = ({ attributes, clientId }) => {
             <p className='ibtaBlockElementsEmpty'>{__('No elements found inside this block.', 'inner-block-text-animation')}</p>
         }
       </PanelBody> */}
+
+      {
+        blockElements.length > 0 && <Notice className='ibtaElementsNote' status='info'>
+          {__('Each panel is one text element, numbered in the order it appears. Every element animates on its own settings and they all start together — give each a longer Delay to play them one after another.', 'inner-block-text-animation')}
+        </Notice>
+      }
 
       {
         blockElements.map((element, i) => <PanelBody

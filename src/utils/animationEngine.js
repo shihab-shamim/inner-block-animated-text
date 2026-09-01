@@ -12,8 +12,12 @@ import { FIELD_DEFAULTS, LOOP_BY_DEFAULT } from './animation';
 // animations whose text the engine rewrites
 export const TEXT_ANIMATIONS = ['typewriter', 'terminal', 'rotating-words', 'morph', 'scramble', 'counter', 'text-decode'];
 
-// animations that always split, regardless of the splitBy field
-export const SPLIT_ANIMATIONS = ['character-reveal', 'word-reveal', 'line-reveal', 'wave', 'text-scatter', 'text-assemble', 'text-shatter', 'text-decode'];
+/**
+ * Animations whose split mode is fixed by what they are: the reveals name their own mode, and
+ * text-decode scrambles one character at a time, so a word or line mode would replace whole
+ * words with a single glyph. Everything else that can split reads the user's Split By field.
+ */
+export const SPLIT_ANIMATIONS = ['character-reveal', 'word-reveal', 'line-reveal', 'text-decode'];
 
 const SPLIT_BY = { 'character-reveal': 'character', 'word-reveal': 'word', 'line-reveal': 'line', 'text-decode': 'character' };
 
@@ -76,44 +80,139 @@ export const runCount = (el, loopField = false) => {
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-/** Split the element's text into spans, each carrying its own index for the CSS stagger. */
-const split = (el, mode) => {
-	const text = el.textContent;
-	let pieces;
+/** True when the visitor has asked the OS for less motion. */
+export const prefersReducedMotion = () =>
+	'function' === typeof window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-	if ('word' === mode) {
-		pieces = text.split(/(\s+)/);
-	} else if ('line' === mode) {
-		pieces = text.split(/\n/);
-	} else {
-		pieces = Array.from(text);
+/**
+ * Frame-synced clock. setTimeout drifts under load and cannot land between frames, so a
+ * long typewriter visibly stutters. Driving the schedule from requestAnimationFrame keeps
+ * every step aligned to a real paint and lets slow frames catch up instead of falling behind.
+ */
+const stepThrough = (total, intervalMs, onStep) => new Promise(resolve => {
+	if (total <= 0) {
+		resolve();
+		return;
 	}
 
-	el.textContent = '';
-	el.classList.add('ibta-is-split');
+	const start = performance.now();
+	let done = -1;
 
-	let index = 0;
+	const frame = (now) => {
+		const reached = Math.min(total, Math.floor((now - start) / intervalMs));
 
-	pieces.forEach(piece => {
-		if ('' === piece) {
+		if (reached > done) {
+			done = reached;
+			onStep(done);
+		}
+
+		if (done >= total) {
+			resolve();
 			return;
 		}
 
-		const part = document.createElement('span');
-		part.className = 'ibta-part';
-		part.textContent = piece;
+		requestAnimationFrame(frame);
+	};
 
-		// whitespace keeps the flow but must not consume a stagger step
-		if (!/^\s+$/.test(piece)) {
-			part.style.setProperty('--ibta-index', index);
-			part.style.setProperty('--ibta-rx', (Math.random() * 2 - 1).toFixed(3));
-			part.style.setProperty('--ibta-ry', (Math.random() * 2 - 1).toFixed(3));
-			part.style.setProperty('--ibta-rr', (Math.random() * 2 - 1).toFixed(3));
-			index++;
+	requestAnimationFrame(frame);
+});
+
+const makePart = (text, index) => {
+	const part = document.createElement('span');
+
+	part.className = 'ibta-part';
+	part.textContent = text;
+
+	// whitespace keeps the flow but must not consume a stagger step or a transform
+	if (!/^\s+$/.test(text)) {
+		part.style.setProperty('--ibta-index', index);
+		part.style.setProperty('--ibta-rx', (Math.random() * 2 - 1).toFixed(3));
+		part.style.setProperty('--ibta-ry', (Math.random() * 2 - 1).toFixed(3));
+		part.style.setProperty('--ibta-rr', (Math.random() * 2 - 1).toFixed(3));
+
+		return { part, counts: true };
+	}
+
+	return { part, counts: false };
+};
+
+/**
+ * Wrap every character or word in its own span, walking the text nodes in place so inline
+ * markup survives. Reading el.textContent and rewriting it would flatten <strong>, <em> and
+ * links into plain text — a silent content loss on any formatted paragraph.
+ */
+const splitTextNodes = (el, mode) => {
+	const doc = el.ownerDocument;
+	const walker = doc.createTreeWalker(el, 4 /* SHOW_TEXT */);
+	const textNodes = [];
+
+	for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+		if (node.nodeValue.length) {
+			textNodes.push(node);
+		}
+	}
+
+	let index = 0;
+
+	textNodes.forEach(node => {
+		const pieces = 'word' === mode ? node.nodeValue.split(/(\s+)/) : Array.from(node.nodeValue);
+		const fragment = doc.createDocumentFragment();
+
+		pieces.forEach(piece => {
+			if ('' === piece) {
+				return;
+			}
+
+			const { part, counts } = makePart(piece, index);
+
+			if (counts) {
+				index++;
+			}
+
+			fragment.appendChild(part);
+		});
+
+		node.parentNode.replaceChild(fragment, node);
+	});
+};
+
+/**
+ * Real visual lines, not "\n". Rendered HTML almost never contains newlines, so splitting on
+ * them produced a single part and Line Reveal never actually staggered.
+ *
+ * Rather than rebuilding the element from its flattened text (which would destroy inline
+ * markup), the text is split per character in place and each character is then given the
+ * stagger index of the row it landed on. Every character on a line shares an index, so the
+ * line animates as one unit while <strong>, links and spans survive intact.
+ */
+const splitLines = (el) => {
+	splitTextNodes(el, 'character');
+
+	let line = 0;
+	let top = null;
+
+	el.querySelectorAll('.ibta-part').forEach(part => {
+		const y = Math.round(part.getBoundingClientRect().top);
+
+		// a zero-height measurement (jsdom, display:none) leaves everything on line 0
+		if (null !== top && y !== top) {
+			line++;
 		}
 
-		el.appendChild(part);
+		top = y;
+		part.style.setProperty('--ibta-index', line);
 	});
+};
+
+/** Split the element's text into spans, each carrying its own index for the CSS stagger. */
+const split = (el, mode) => {
+	el.classList.add('ibta-is-split');
+
+	if ('line' === mode) {
+		splitLines(el);
+	} else {
+		splitTextNodes(el, mode);
+	}
 
 	return el.querySelectorAll('.ibta-part');
 };
@@ -133,20 +232,23 @@ const formatNumber = (value, separator, prefix, suffix) => {
 	return `${prefix}${body}${suffix}`;
 };
 
-const typeText = async (el, text, speed) => {
+const typeText = (el, text, speed) => {
+	const chars = Array.from(text);
+
 	el.textContent = '';
 
-	for (let i = 0; i < text.length; i++) {
-		el.textContent += text[i];
-		await wait(speed);
-	}
+	return stepThrough(chars.length, speed, (n) => {
+		el.textContent = chars.slice(0, n).join('');
+	});
 };
 
-const eraseText = async (el, speed) => {
-	while (el.textContent.length) {
-		el.textContent = el.textContent.slice(0, -1);
-		await wait(speed / 2);
-	}
+const eraseText = (el, speed) => {
+	const chars = Array.from(el.textContent);
+
+	// erasing reads best at roughly twice typing speed
+	return stepThrough(chars.length, speed / 2, (n) => {
+		el.textContent = chars.slice(0, chars.length - n).join('');
+	});
 };
 
 const runTypewriter = async (el, source) => {
@@ -356,6 +458,22 @@ export const initElement = (el) => {
 	}
 
 	el.dataset.ibtaReady = 'true';
+
+	// The stylesheet already disables CSS animations under reduced motion, but the JS
+	// effects rewrite text and would keep running. Leave the content in its final state.
+	if (prefersReducedMotion()) {
+		if ('counter' === type) {
+			const to = num(el, 'ibtaCounterend', FIELD_DEFAULTS.counterEnd);
+			el.textContent = formatNumber(
+				to,
+				str(el, 'ibtaSeparator', FIELD_DEFAULTS.separator),
+				str(el, 'ibtaPrefix', FIELD_DEFAULTS.prefix),
+				str(el, 'ibtaSuffix', FIELD_DEFAULTS.suffix)
+			);
+		}
+
+		return;
+	}
 
 	const source = el.textContent;
 	const splitBy = SPLIT_ANIMATIONS.includes(type) ? SPLIT_BY[type] || 'character' : el.dataset.ibtaSplitby;
