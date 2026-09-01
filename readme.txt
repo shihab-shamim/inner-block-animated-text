@@ -1,4 +1,4 @@
-=== Inner Block Text Animation ===
+=== Inner Text Animator ===
 Contributors:		bplugins
 Donate link:		https://gum.co/wpdonate/
 Tags:				block, key1, key2, key3, key4
@@ -20,17 +20,17 @@ Short description of the plugin
 Long description of the plugin
 
 
-### Inner Block Text Animation Features
+### Inner Text Animator Features
 - **Feature 1**: Feature 1 description.
 
 
-### Inner Block Text Animation Pro Features
+### Inner Text Animator Pro Features
 - **Feature 1**: Feature 1 description.
 
 
-= How to use Inner Block Text Animation =
-- First, install the Inner Block Text Animation plugin from the WordPress dashboard.
-- Add the Inner Block Text Animation from the block category called "widgets" in the Gutenberg editor.
+= How to use Inner Text Animator =
+- First, install the Inner Text Animator plugin from the WordPress dashboard.
+- Add the Inner Text Animator from the block category called "widgets" in the Gutenberg editor.
 - You can change block settings from the right-side settings sidebar.
 - Enjoy!
 
@@ -73,17 +73,17 @@ Long description of the plugin
 
 ### From Gutenberg Editor:
 1. Go to the WordPress Block/Gutenberg Editor
-2. Search For **Inner Block Text Animation**
-3. Click on the **Inner Block Text Animation** to add the block
+2. Search For **Inner Text Animator**
+3. Click on the **Inner Text Animator** to add the block
 
 ### Download & Upload:
-1. Download the **Inner Block Text Animation** plugin (*.zip file*)
+1. Download the **Inner Text Animator** plugin (*.zip file*)
 2. In your admin area, go to the Plugins menu and click on **Add New**
 3. Click on **Upload Plugin** and choose the **`inner-block-text-animation.zip`** file and click on **Install Now**
 4. Activate the plugin and Enjoy!
 
 ### Manually:
-1. Download and upload the **Inner Block Text Animation** plugin to the **`/wp-content/plugins/`** directory
+1. Download and upload the **Inner Text Animator** plugin to the **`/wp-content/plugins/`** directory
 2. Activate the plugin through the Plugins menu in WordPress
 
 

@@ -1,7 +1,37 @@
-const iconColor = '#4527a4';
+/**
+ * Block icon.
+ *
+ * The frame is the container block; the three bars are the inner text elements arriving one
+ * after another on a stagger, which is exactly what the block does. The caret marks it as
+ * text rather than generic content.
+ *
+ * The CSS lives inside the SVG on purpose. The icon is rendered in the inserter and the list
+ * view, which sit in the top document, and also inside the apiVersion 3 canvas iframe — an
+ * editorStyle rule would not reach every one of those. Class names are prefixed so the
+ * document-scoped <style> cannot touch anything else.
+ */
+export const blockIcon = <svg xmlns='http://www.w3.org/2000/svg' width={24} height={24} viewBox='0 0 24 24' fill='none' aria-hidden='true' focusable='false'>
+	<style>{`
+		.ibtaIcoBar { transform-box: fill-box; animation: ibtaIcoIn 2.6s cubic-bezier(.05,.7,.1,1) infinite; }
+		.ibtaIcoBar2 { animation-delay: .16s; }
+		.ibtaIcoBar3 { animation-delay: .32s; }
+		.ibtaIcoCaret { animation: ibtaIcoBlink 1.05s steps(1,end) infinite; }
+		@keyframes ibtaIcoIn {
+			0% { opacity: 0; translate: -5px 0; }
+			18%, 74% { opacity: 1; translate: 0 0; }
+			90%, 100% { opacity: 0; translate: -5px 0; }
+		}
+		@keyframes ibtaIcoBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: .15; } }
+		@media (prefers-reduced-motion: reduce) {
+			.ibtaIcoBar, .ibtaIcoCaret { animation: none; opacity: 1; translate: none; }
+		}
+	`}</style>
 
-export const blockIcon = <svg xmlns='http://www.w3.org/2000/svg' width={24} height={24} viewBox='0 0 20 20' fill={iconColor}>
-	<path fill={iconColor} fillRule='evenodd' d='M9.938 4.016a.146.146 0 00-.054.057L3.027 15.74a.176.176 0 00-.002.183c.016.03.037.05.054.06.015.01.034.017.066.017h13.713a.12.12 0 00.066-.017.163.163 0 00.055-.06.176.176 0 00-.003-.183L10.12 4.073a.146.146 0 00-.054-.057.13.13 0 00-.063-.016.13.13 0 00-.064.016zm1.043-.45a1.13 1.13 0 00-1.96 0L2.166 15.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L10.982 3.566z'></path>
-	<rect fill={iconColor} width='2' height='2' x='9.002' y='13' rx='1'></rect>
-	<path fill={iconColor} d='M9.1 7.995a.905.905 0 111.8 0l-.35 3.507a.553.553 0 01-1.1 0L9.1 7.995z'></path>
+	<rect x='2.7' y='3.7' width='18.6' height='16.6' rx='3.4' stroke='currentColor' strokeWidth='1.6' opacity='.45' />
+
+	<rect className='ibtaIcoBar ibtaIcoBar1' x='6' y='7.55' width='12' height='2.1' rx='1.05' fill='currentColor' />
+	<rect className='ibtaIcoBar ibtaIcoBar2' x='6' y='11.35' width='9' height='2.1' rx='1.05' fill='currentColor' />
+	<rect className='ibtaIcoBar ibtaIcoBar3' x='6' y='15.15' width='5.4' height='2.1' rx='1.05' fill='currentColor' />
+
+	<rect className='ibtaIcoCaret' x='12.7' y='14.5' width='1.5' height='3.4' rx='.75' fill='currentColor' />
 </svg>;

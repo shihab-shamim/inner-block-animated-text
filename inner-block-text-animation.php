@@ -1,8 +1,9 @@
 <?php
 /**
- * Plugin Name: Inner Block Text Animation
+ * Plugin Name: Inner Text Animator
  * Description: Short description of the plugin
  * Version: 1.0.0
+ * Update URI: false
  * Author: bPlugins
  * Author URI: https://bplugins.com
  * License: GPLv3

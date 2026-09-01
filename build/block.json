@@ -3,11 +3,11 @@
   "apiVersion": 3,
   "name": "ibta/inner-block-text-animation",
   "version": "1.0.0",
-  "title": "Inner Block Text Animation",
+  "title": "Inner Text Animator",
   "category": "widgets",
   "description": "Animate each inner text element independently with 56 entrance, loop, typing and style effects.",
   "keywords": [
-    "Inner Block Text Animation"
+    "Inner Text Animator"
   ],
   "textdomain": "inner-block-text-animation",
   "attributes": {
