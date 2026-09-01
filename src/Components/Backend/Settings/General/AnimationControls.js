@@ -3,7 +3,8 @@ import { useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { Button, ColorPalette, GradientPicker, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
 
-import { ANIMATION_OPTIONS, getElementAnimation, getFieldValue, getVisibleFields } from '../../../../utils/animation';
+import { ANIMATION_OPTIONS, RAINBOW_GRADIENT, getElementAnimation, getFieldValue, getVisibleFields } from '../../../../utils/animation';
+import { previewAnimation } from '../../../../utils/animationPreview';
 
 const easingOptions = [
 	{ label: 'linear', value: 'linear' },
@@ -18,6 +19,15 @@ const easingOptions = [
 const directionOptions = ['up', 'down', 'left', 'right'].map(v => ({ label: v, value: v }));
 const splitByOptions = ['none', 'character', 'word', 'line'].map(v => ({ label: v, value: v }));
 const separatorOptions = ['none', 'comma', 'space', 'dot'].map(v => ({ label: v, value: v }));
+
+// each preset opens and closes on the same colour so the scroll loops without a jump
+const gradientPresets = [
+	{ slug: 'ibta-rainbow', name: __('Rainbow', 'inner-block-text-animation'), gradient: RAINBOW_GRADIENT },
+	{ slug: 'ibta-sunset', name: __('Sunset', 'inner-block-text-animation'), gradient: 'linear-gradient(90deg, #ff512f, #f09819, #ff512f)' },
+	{ slug: 'ibta-ocean', name: __('Ocean', 'inner-block-text-animation'), gradient: 'linear-gradient(90deg, #2193b0, #6dd5ed, #2193b0)' },
+	{ slug: 'ibta-neon', name: __('Neon', 'inner-block-text-animation'), gradient: 'linear-gradient(90deg, #f857a6, #ff5858, #f857a6)' },
+	{ slug: 'ibta-mint', name: __('Mint', 'inner-block-text-animation'), gradient: 'linear-gradient(90deg, #11998e, #38ef7d, #11998e)' }
+];
 
 const AnimationControls = ({ element, blockAttributes }) => {
 	const { updateBlockAttributes } = useDispatch(blockEditorStore);
@@ -106,7 +116,7 @@ const AnimationControls = ({ element, blockAttributes }) => {
 			case 'colorAlt': return color(field, __('Secondary Color', 'inner-block-text-animation'));
 			case 'colors': return <div key={field} className='mt10'>
 				<p className='ibtaAnimationLabel'>{__('Colors', 'inner-block-text-animation')}</p>
-				<GradientPicker value={value(field)} onChange={(next) => setField(field, next)} gradients={[]} />
+				<GradientPicker value={value(field)} onChange={(next) => setField(field, next || getFieldValue({ type: animation.type }, 'colors'))} gradients={gradientPresets} clearable={false} />
 			</div>;
 			case 'highlightColor': return color(field, __('Highlight Color', 'inner-block-text-animation'));
 			case 'shineColor': return color(field, __('Shine Color', 'inner-block-text-animation'));
@@ -146,6 +156,11 @@ const AnimationControls = ({ element, blockAttributes }) => {
 		/>
 
 		{fields.map(renderField)}
+
+		{animation.type && <Button className='mt10 ibtaPreviewButton' variant='secondary' icon='controls-play'
+			onClick={() => previewAnimation(element.clientId)}>
+			{__('Preview Animation', 'inner-block-text-animation')}
+		</Button>}
 	</>;
 };
 

@@ -74,36 +74,36 @@ export const ANIMATION_SETTINGS = {
 	'': [],
 
 	// Entrance
-	'fade-in': ['duration', 'delay', 'easing', 'splitBy', 'stagger'],
-	'slide-up': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger'],
-	'slide-down': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger'],
-	'slide-left': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger'],
-	'slide-right': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger'],
-	'zoom-in': ['duration', 'delay', 'easing', 'scale', 'splitBy', 'stagger'],
-	'zoom-out': ['duration', 'delay', 'easing', 'scale', 'splitBy', 'stagger'],
-	'flip-x': ['duration', 'delay', 'easing', 'perspective', 'splitBy', 'stagger'],
-	'flip-y': ['duration', 'delay', 'easing', 'perspective', 'splitBy', 'stagger'],
-	'rotate-in': ['duration', 'delay', 'easing', 'angle', 'splitBy', 'stagger'],
-	'blur-in': ['duration', 'delay', 'easing', 'blurAmount', 'splitBy', 'stagger'],
-	'mask-reveal': ['duration', 'delay', 'easing', 'direction'],
-	'drop-in': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger'],
-	'elastic-in': ['duration', 'delay', 'distance', 'splitBy', 'stagger'],
-	'bounce-in': ['duration', 'delay', 'distance', 'splitBy', 'stagger'],
-	'swing-in': ['duration', 'delay', 'easing', 'angle', 'splitBy', 'stagger'],
+	'fade-in': ['duration', 'delay', 'easing', 'splitBy', 'stagger', 'iteration'],
+	'slide-up': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'slide-down': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'slide-left': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'slide-right': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'zoom-in': ['duration', 'delay', 'easing', 'scale', 'splitBy', 'stagger', 'iteration'],
+	'zoom-out': ['duration', 'delay', 'easing', 'scale', 'splitBy', 'stagger', 'iteration'],
+	'flip-x': ['duration', 'delay', 'easing', 'perspective', 'splitBy', 'stagger', 'iteration'],
+	'flip-y': ['duration', 'delay', 'easing', 'perspective', 'splitBy', 'stagger', 'iteration'],
+	'rotate-in': ['duration', 'delay', 'easing', 'angle', 'splitBy', 'stagger', 'iteration'],
+	'blur-in': ['duration', 'delay', 'easing', 'blurAmount', 'splitBy', 'stagger', 'iteration'],
+	'mask-reveal': ['duration', 'delay', 'easing', 'direction', 'iteration'],
+	'drop-in': ['duration', 'delay', 'easing', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'elastic-in': ['duration', 'delay', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'bounce-in': ['duration', 'delay', 'distance', 'splitBy', 'stagger', 'iteration'],
+	'swing-in': ['duration', 'delay', 'easing', 'angle', 'splitBy', 'stagger', 'iteration'],
 
 	// Typing
-	'typewriter': ['typingSpeed', 'delay', 'cursor', 'cursorChar', 'loop', 'loopDelay'],
-	'rotating-words': ['words', 'typingSpeed', 'delay', 'cursor', 'cursorChar', 'loopDelay'],
-	'scramble': ['duration', 'delay', 'scrambleChars', 'loop', 'loopDelay'],
-	'counter': ['counterStart', 'counterEnd', 'duration', 'delay', 'easing', 'separator', 'prefix', 'suffix'],
-	'terminal': ['typingSpeed', 'delay', 'cursor', 'cursorChar', 'promptChar', 'loop', 'loopDelay'],
-	'text-decode': ['duration', 'delay', 'scrambleChars', 'stagger', 'loop', 'loopDelay'],
-	'character-reveal': ['duration', 'delay', 'easing', 'stagger'],
-	'word-reveal': ['duration', 'delay', 'easing', 'stagger'],
-	'line-reveal': ['duration', 'delay', 'easing', 'stagger'],
+	'typewriter': ['typingSpeed', 'delay', 'cursor', 'cursorChar', 'loop', 'loopDelay', 'iteration'],
+	'rotating-words': ['words', 'typingSpeed', 'delay', 'cursor', 'cursorChar', 'loopDelay', 'iteration'],
+	'scramble': ['duration', 'delay', 'scrambleChars', 'loop', 'loopDelay', 'iteration'],
+	'counter': ['counterStart', 'counterEnd', 'duration', 'delay', 'easing', 'separator', 'prefix', 'suffix', 'iteration'],
+	'terminal': ['typingSpeed', 'delay', 'cursor', 'cursorChar', 'promptChar', 'loop', 'loopDelay', 'iteration'],
+	'text-decode': ['duration', 'delay', 'scrambleChars', 'stagger', 'loop', 'loopDelay', 'iteration'],
+	'character-reveal': ['duration', 'delay', 'easing', 'stagger', 'iteration'],
+	'word-reveal': ['duration', 'delay', 'easing', 'stagger', 'iteration'],
+	'line-reveal': ['duration', 'delay', 'easing', 'stagger', 'iteration'],
 
 	// Loop
-	'marquee': ['direction', 'speed', 'pauseOnHover', 'gap'],
+	'marquee': ['direction', 'speed', 'pauseOnHover', 'gap', 'iteration'],
 	'wave': ['duration', 'delay', 'amplitude', 'stagger', 'iteration'],
 	'bounce': ['duration', 'delay', 'amplitude', 'iteration'],
 	'float': ['duration', 'delay', 'amplitude', 'iteration'],
@@ -119,24 +119,24 @@ export const ANIMATION_SETTINGS = {
 	'rubber-band': ['duration', 'delay', 'iteration'],
 
 	// Creative
-	'morph': ['words', 'duration', 'delay', 'easing', 'loopDelay'],
-	'split': ['duration', 'delay', 'easing', 'distance', 'direction'],
-	'text-scatter': ['duration', 'delay', 'easing', 'distance', 'stagger'],
-	'text-assemble': ['duration', 'delay', 'easing', 'distance', 'stagger'],
-	'text-shatter': ['duration', 'delay', 'easing', 'distance', 'stagger'],
-	'perspective': ['duration', 'delay', 'easing', 'perspective', 'angle'],
+	'morph': ['words', 'duration', 'delay', 'easing', 'loopDelay', 'iteration'],
+	'split': ['duration', 'delay', 'easing', 'distance', 'direction', 'iteration'],
+	'text-scatter': ['duration', 'delay', 'easing', 'distance', 'stagger', 'iteration'],
+	'text-assemble': ['duration', 'delay', 'easing', 'distance', 'stagger', 'iteration'],
+	'text-shatter': ['duration', 'delay', 'easing', 'distance', 'stagger', 'iteration'],
+	'perspective': ['duration', 'delay', 'easing', 'perspective', 'angle', 'iteration'],
 	'3d-rotate': ['duration', 'delay', 'easing', 'perspective', 'angle', 'iteration'],
 
 	// Style
 	'gradient-move': ['colors', 'duration', 'delay', 'direction', 'iteration'],
 	'shine': ['shineColor', 'shineWidth', 'duration', 'delay', 'iteration'],
 	'color-shift': ['colors', 'duration', 'delay', 'iteration'],
-	'highlight': ['highlightColor', 'duration', 'delay', 'easing', 'direction'],
-	'underline-draw': ['color', 'strokeWidth', 'duration', 'delay', 'easing'],
-	'stroke-draw': ['strokeColor', 'strokeWidth', 'duration', 'delay', 'easing'],
-	'text-shadow': ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'duration', 'delay'],
+	'highlight': ['highlightColor', 'duration', 'delay', 'easing', 'direction', 'iteration'],
+	'underline-draw': ['color', 'strokeWidth', 'duration', 'delay', 'easing', 'iteration'],
+	'stroke-draw': ['strokeColor', 'strokeWidth', 'duration', 'delay', 'easing', 'iteration'],
+	'text-shadow': ['shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'duration', 'delay', 'iteration'],
 	'glow': ['color', 'intensity', 'duration', 'delay', 'iteration'],
-	'rainbow': ['duration', 'delay', 'iteration'],
+	'rainbow': ['colors', 'duration', 'delay', 'iteration'],
 	'shimmer': ['shineColor', 'duration', 'delay', 'iteration']
 };
 
@@ -232,7 +232,39 @@ export const getElementAnimation = (element, blockAttributes) => {
 	return { ...legacy, ...stored, type: stored.type ?? legacy.type ?? '' };
 };
 
-export const getFieldValue = (animation, field) => animation?.[field] ?? FIELD_DEFAULTS[field];
+/**
+ * Animations that ran forever before "Loop Forever" became available on every animation.
+ * Their iteration default stays 'infinite' so existing content keeps behaving as it did;
+ * every other animation defaults to playing once.
+ */
+export const LOOP_BY_DEFAULT = [
+	'wave', 'bounce', 'float', 'pulse', 'shake', 'glitch', 'neon-flicker', 'jello', 'heartbeat',
+	'swing', 'wobble', 'tada', 'rubber-band', '3d-rotate', 'gradient-move', 'shine', 'color-shift',
+	'glow', 'rainbow', 'shimmer',
+	// these loop by definition: the engine cycles them
+	'marquee', 'rotating-words', 'morph'
+];
+
+/**
+ * Rainbow's spectrum. It opens and closes on the same red so the scroll loops with no
+ * colour jump; a custom gradient looks best when its first and last stops match too.
+ */
+export const RAINBOW_GRADIENT = 'linear-gradient(90deg, #ff0000, #ff8c00, #ffd500, #48d100, #00c4c4, #0072ff, #7b2ff7, #ff008c, #ff0000)';
+
+export const getFieldDefault = (type, field) => {
+	if ('iteration' === field) {
+		return LOOP_BY_DEFAULT.includes(type) ? 'infinite' : 1;
+	}
+
+	// rainbow shares the `colors` field but defaults to the spectrum, not the blue gradient
+	if ('colors' === field && 'rainbow' === type) {
+		return RAINBOW_GRADIENT;
+	}
+
+	return FIELD_DEFAULTS[field];
+};
+
+export const getFieldValue = (animation, field) => animation?.[field] ?? getFieldDefault(animation?.type, field);
 
 /**
  * Fields of the selected animation that pass the nested visibility rules (Section 7.3).
@@ -286,7 +318,8 @@ export const getAnimationProps = (element, blockAttributes) => {
 
 		if (CSS_VARS[field]) {
 			const [property, format] = CSS_VARS[field];
-			style[property] = format(value);
+			// always a string: a raw number would be unit-guessed by some renderers
+			style[property] = String(format(value));
 		} else {
 			dataset[`data-ibta-${field.toLowerCase()}`] = Array.isArray(value) ? JSON.stringify(value) : String(value);
 		}

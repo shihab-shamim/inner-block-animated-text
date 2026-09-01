@@ -7,7 +7,7 @@
  * so each element runs on its own configuration with no shared state.
  */
 
-import { FIELD_DEFAULTS } from './animation';
+import { FIELD_DEFAULTS, LOOP_BY_DEFAULT } from './animation';
 
 // animations whose text the engine rewrites
 export const TEXT_ANIMATIONS = ['typewriter', 'terminal', 'rotating-words', 'morph', 'scramble', 'counter', 'text-decode'];
@@ -42,10 +42,36 @@ const list = (el, field) => {
 	}
 };
 
+const cssVar = (el, property) => (el.style.getPropertyValue(property) || getComputedStyle(el).getPropertyValue(property) || '').trim();
+
 const cssSeconds = (el, property, fallback) => {
-	const raw = getComputedStyle(el).getPropertyValue(property).trim();
-	const parsed = parseFloat(raw);
+	const parsed = parseFloat(cssVar(el, property));
 	return Number.isNaN(parsed) ? fallback : parsed;
+};
+
+/**
+ * How many times a JS driven animation should run. animation-iteration-count does
+ * nothing for these, so "Loop Forever" is honoured here instead.
+ * The per-animation loop toggle still wins when it is on, so existing behaviour is kept.
+ */
+export const runCount = (el, loopField = false) => {
+	if (loopField) {
+		return Infinity;
+	}
+
+	const raw = cssVar(el, '--ibta-iteration');
+
+	if ('' === raw) {
+		// content saved before Loop Forever existed
+		return LOOP_BY_DEFAULT.includes(el.dataset.ibtaAnimation) ? Infinity : 1;
+	}
+
+	if ('infinite' === raw) {
+		return Infinity;
+	}
+
+	const parsed = parseInt(raw, 10);
+	return Number.isNaN(parsed) ? 1 : Math.max(1, parsed);
 };
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -128,14 +154,16 @@ const runTypewriter = async (el, source) => {
 	const loop = bool(el, 'ibtaLoop', FIELD_DEFAULTS.loop);
 	const loopDelay = num(el, 'ibtaLoopdelay', FIELD_DEFAULTS.loopDelay) * 1000;
 
-	do {
+	const runs = runCount(el, loop);
+
+	for (let n = 0; n < runs; n++) {
 		await typeText(el, source, speed);
 
-		if (loop) {
+		if (n + 1 < runs) {
 			await wait(loopDelay);
 			await eraseText(el, speed);
 		}
-	} while (loop);
+	}
 };
 
 const runRotatingWords = async (el, source) => {
@@ -144,11 +172,16 @@ const runRotatingWords = async (el, source) => {
 	const loopDelay = num(el, 'ibtaLoopdelay', FIELD_DEFAULTS.loopDelay) * 1000;
 	const cycle = words.length ? words : [source];
 
-	// rotating-words loops by definition (Section 7.3)
-	for (let i = 0; ; i = (i + 1) % cycle.length) {
+	// rotating-words loops by definition (Section 7.3), but Loop Forever can bound it
+	const runs = runCount(el);
+
+	for (let n = 0, i = 0; n < runs; n++, i = (i + 1) % cycle.length) {
 		await typeText(el, cycle[i], speed);
 		await wait(loopDelay);
-		await eraseText(el, speed);
+
+		if (n + 1 < runs) {
+			await eraseText(el, speed);
+		}
 
 		if (1 === cycle.length) {
 			await wait(loopDelay);
@@ -164,17 +197,21 @@ const runMorph = async (el, source) => {
 
 	el.style.transition = `opacity ${duration}ms var(--ibta-easing, ease), filter ${duration}ms var(--ibta-easing, ease)`;
 
-	for (let i = 0; ; i = (i + 1) % cycle.length) {
+	const runs = runCount(el);
+
+	for (let n = 0, i = 0; n < runs; n++, i = (i + 1) % cycle.length) {
 		el.textContent = cycle[i];
 		el.style.opacity = '1';
 		el.style.filter = 'blur(0)';
 
 		await wait(loopDelay);
 
-		el.style.opacity = '0';
-		el.style.filter = 'blur(6px)';
+		if (n + 1 < runs) {
+			el.style.opacity = '0';
+			el.style.filter = 'blur(6px)';
 
-		await wait(duration);
+			await wait(duration);
+		}
 	}
 };
 
@@ -186,7 +223,9 @@ const runScramble = async (el, source) => {
 	const steps = Math.max(1, Math.round(duration / 40));
 	const pick = () => pool[Math.floor(Math.random() * pool.length)] || '';
 
-	do {
+	const runs = runCount(el, loop);
+
+	for (let n = 0; n < runs; n++) {
 		for (let step = 0; step <= steps; step++) {
 			const settled = Math.floor((step / steps) * source.length);
 
@@ -199,10 +238,10 @@ const runScramble = async (el, source) => {
 
 		el.textContent = source;
 
-		if (loop) {
+		if (n + 1 < runs) {
 			await wait(loopDelay);
 		}
-	} while (loop);
+	}
 };
 
 // text-decode reads its characters from the split parts, not from the source string
@@ -214,7 +253,9 @@ const runTextDecode = async (el) => {
 	const stagger = cssSeconds(el, '--ibta-stagger', FIELD_DEFAULTS.stagger) * 1000;
 	const pick = () => pool[Math.floor(Math.random() * pool.length)] || '';
 
-	do {
+	const runs = runCount(el, loop);
+
+	for (let n = 0; n < runs; n++) {
 		const parts = Array.from(el.querySelectorAll('.ibta-part'));
 		const chars = parts.map(part => part.dataset.ibtaChar ?? part.textContent);
 
@@ -234,19 +275,13 @@ const runTextDecode = async (el) => {
 			part.textContent = chars[i];
 		}));
 
-		if (loop) {
+		if (n + 1 < runs) {
 			await wait(loopDelay);
 		}
-	} while (loop);
+	}
 };
 
-const runCounter = async (el) => {
-	const from = num(el, 'ibtaCounterstart', FIELD_DEFAULTS.counterStart);
-	const to = num(el, 'ibtaCounterend', FIELD_DEFAULTS.counterEnd);
-	const duration = cssSeconds(el, '--ibta-duration', FIELD_DEFAULTS.duration) * 1000;
-	const separator = str(el, 'ibtaSeparator', FIELD_DEFAULTS.separator);
-	const prefix = str(el, 'ibtaPrefix', FIELD_DEFAULTS.prefix);
-	const suffix = str(el, 'ibtaSuffix', FIELD_DEFAULTS.suffix);
+const countOnce = (el, from, to, duration, separator, prefix, suffix) => {
 	const start = performance.now();
 
 	return new Promise(resolve => {
@@ -264,6 +299,20 @@ const runCounter = async (el) => {
 
 		requestAnimationFrame(tick);
 	});
+};
+
+const runCounter = async (el) => {
+	const from = num(el, 'ibtaCounterstart', FIELD_DEFAULTS.counterStart);
+	const to = num(el, 'ibtaCounterend', FIELD_DEFAULTS.counterEnd);
+	const duration = cssSeconds(el, '--ibta-duration', FIELD_DEFAULTS.duration) * 1000;
+	const separator = str(el, 'ibtaSeparator', FIELD_DEFAULTS.separator);
+	const prefix = str(el, 'ibtaPrefix', FIELD_DEFAULTS.prefix);
+	const suffix = str(el, 'ibtaSuffix', FIELD_DEFAULTS.suffix);
+	const runs = runCount(el);
+
+	for (let n = 0; n < runs; n++) {
+		await countOnce(el, from, to, duration, separator, prefix, suffix);
+	}
 };
 
 const runMarquee = (el) => {
@@ -288,6 +337,8 @@ const runMarquee = (el) => {
 	void content;
 
 	// duration comes from the element's own width and its own speed setting
+	el.classList.add('ibta-marquee-ready');
+
 	const distance = track.scrollWidth / 2;
 	el.style.setProperty('--ibta-duration', `${Math.max(1, distance / Math.max(1, speed))}s`);
 };
